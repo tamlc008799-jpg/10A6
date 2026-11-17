@@ -341,219 +341,6 @@ body:document.getElementById('letterBodyInput').value.trim()||DEFAULT_LETTER.bod
 sign:document.getElementById('letterSignInput').value.trim()
 };
 const st=document.getElementById('letterStatus');
-try{await letterRef.set(data);letterCache=datnh cho tất cả chúng ta.</p>
-<div class="envelope" id="envelope" onclick="showLetter()">
-<div class="env-back"></div><div class="env-front"></div><div class="env-flap"></div><div class="seal">✦</div>
-</div>
-<p class="hint">Chạm vào phong thư để mở lời nhắn</p>
-</div>
-</main>
-
-<!-- TRÌNH PHÁT NHẠC -->
-<button class="music-fab" id="musicFab" onclick="toggleMusicPanel()" aria-label="Chọn nhạc">🎵</button>
-<div class="music-panel" id="musicPanel">
-<h3>🎵 Chọn nhạc</h3>
-<div class="song-list" id="musicList"></div>
-<div class="player-ctrl">
-<button onclick="prevSong()" aria-label="Bài trước">⏮</button>
-<button onclick="togglePlay()" id="playBtn" aria-label="Phát/Tạm dừng">▶</button>
-<button onclick="nextSong()" aria-label="Bài sau">⏭</button>
-<input type="range" id="vol" min="0" max="1" step="0.05" value="0.7" oninput="setVolume(this.value)" aria-label="Âm lượng">
-</div>
-<div class="now" id="nowPlaying"></div>
-</div>
-
-<!-- ĐĂNG NHẬP ADMIN -->
-<div class="modal" id="adminLoginModal">
-<div class="panel" style="max-width:390px">
-<button class="close" onclick="closeModal('adminLoginModal')">×</button>
-<h2>🔐 Đăng nhập quản trị</h2>
-<label for="adminUser">Email quản trị viên</label>
-<input id="adminUser" type="text" placeholder="Nhập email Firebase" autocomplete="username">
-<label for="adminPass">Mật khẩu quản trị</label>
-<input id="adminPass" type="password" placeholder="Mật khẩu">
-<div class="form-actions"><button class="primary" onclick="adminLogin()">Đăng nhập</button></div>
-<div class="status" id="adminLoginStatus"></div>
-</div>
-</div>
-
-<!-- BẢNG QUẢN TRỊ -->
-<div class="modal" id="adminModal">
-<div class="panel">
-<button class="close" onclick="closeAdmin()">×</button>
-<h2>🪐 Quản trị Galaxy Memories</h2>
-<p style="font-size:13px;color:#c7c6d4;line-height:1.6">Chỉnh sửa lời nhắn chung, thêm tên, ảnh và lời nhắn cho từng học sinh. Dữ liệu được đồng bộ trực tuyến qua Firebase.</p>
-<div class="admin-list" style="border-top:0;padding-top:0;margin-top:18px">
-<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:4px">💌 Lời nhắn chung (lá thư gửi cả lớp)</h3>
-<label for="letterTitleInput">Tiêu đề thư</label>
-<input id="letterTitleInput" type="text">
-<label for="letterBodyInput">Nội dung thư (xuống dòng để tách đoạn)</label>
-<textarea id="letterBodyInput" style="min-height:190px"></textarea>
-<label for="letterSignInput">Dòng ký tên / kết thư (in đậm)</label>
-<input id="letterSignInput" type="text">
-<div class="form-actions">
-<button class="primary" onclick="saveLetter()">💾 Lưu lời nhắn chung</button>
-<button onclick="resetLetter()">↺ Khôi phục mặc định</button>
-</div>
-<div class="status" id="letterStatus"></div>
-</div>
-<div class="admin-list">
-<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:4px">🎵 Nhạc cho khách chọn</h3>
-<label for="songTitle">Tên bài hát (có thể để trống)</label>
-<input id="songTitle" type="text" placeholder="Ví dụ: Bài hát của lớp">
-<label for="songFile">File nhạc (MP3, M4A, WAV, OGG — tối đa 20 MB)</label>
-<input id="songFile" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac,.flac,.opus,.wma">
-<div class="form-actions"><button class="primary" onclick="uploadSong()">＋ Tải nhạc lên</button></div>
-<div class="status" id="songStatus"></div>
-<div id="adminSongList"></div>
-</div>
-<div class="admin-list">
-<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:4px">🪐 Thêm học sinh</h3>
-<label for="studentName">Họ và tên học sinh</label>
-<input id="studentName" type="text" placeholder="Ví dụ: Nguyễn Văn A">
-<label for="studentWish">Lời chúc / lời nhắn</label>
-<textarea id="studentWish" placeholder="Viết lời chúc dành cho bạn ấy..."></textarea>
-<label for="studentImage">Ảnh học sinh</label>
-<input id="studentImage" type="file" accept="image/*">
-<div class="form-actions">
-<button class="primary" onclick="addStudent()">＋ Thêm học sinh</button>
-<button onclick="clearForm()">Xóa nội dung nhập</button>
-</div>
-<div class="status" id="adminStatus"></div>
-</div>
-<div class="admin-list">
-<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:8px">Danh sách hiện có</h3>
-<div id="adminStudentList"></div>
-</div>
-<p class="small">Danh sách học sinh và lời nhắn chung được đồng bộ qua Firebase. Nhạc tải lên vẫn chỉ lưu trên thiết bị hiện tại; muốn đồng bộ nhạc cần lưu file nhạc ở dịch vụ lưu trữ trực tuyến riêng.</p>
-</div>
-</div>
-
-<!-- LỜI NHẮN CHUNG -->
-<div class="modal" id="letterModal">
-<div class="letter">
-<button class="close" onclick="closeLetter()">×</button>
-<h2 id="letterTitle">Gửi tập thể 10A6,</h2>
-<p id="letterBody"></p>
-<p id="letterSign" style="margin-top:14px"><strong></strong></p>
-</div>
-</div>
-
-<!-- LỜI NHẮN RIÊNG -->
-<div class="modal" id="studentModal">
-<div class="letter">
-<button class="close" onclick="closeModal('studentModal')">×</button>
-<h2 id="studentModalName">Gửi bạn,</h2>
-<p id="studentModalWish"></p>
-</div>
-</div>
-
-<script>
-// BẦU TRỜI SAO
-const sky=document.getElementById('sky');
-for(let i=0;i<160;i++){
-const s=document.createElement('i');s.className='star';
-s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
-const z=Math.random()*2+1;s.style.width=z+'px';s.style.height=z+'px';
-s.style.animationDelay=Math.random()*4+'s';sky.appendChild(s);
-}
-setInterval(()=>{
-const s=document.createElement('div');s.className='shooting';
-s.style.left=(30+Math.random()*80)+'%';s.style.top=Math.random()*65+'%';
-document.body.appendChild(s);setTimeout(()=>s.remove(),1800);
-},3200);
-
-// KẾT NỐI FIREBASE
-const firebaseConfig = {
-  apiKey: "AIzaSyDq2V9UbaT1XK0HabIR4zcxh6N_wjKSk3s",
-  authDomain: "galaxy-memories-10a6-91626.firebaseapp.com",
-  projectId: "galaxy-memories-10a6-91626",
-  storageBucket: "galaxy-memories-10a6-91626.firebasestorage.app",
-  messagingSenderId: "718331576098",
-  appId: "1:718331576098:web:38609f42da31b1790c6f7b"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-const studentsRef = db.collection('students');
-const letterRef = db.collection('site_content').doc('letter');
-let firebaseReady = false;
-let studentsCache = [];
-let letterCache = null;
-
-const VISITOR_PASSWORD="10A6";
-
-// SO SÁNH KHÔNG PHÂN BIỆT HOA THƯỜNG
-function sameText(a,b){return String(a).trim().toLowerCase()===String(b).trim().toLowerCase()}
-
-// MẬT KHẨU TRUY CẬP
-function unlockSite(){
-const value=document.getElementById('visitorPassword').value;
-if(sameText(value,VISITOR_PASSWORD)){
-document.getElementById('accessGate').style.display='none';
-try{sessionStorage.setItem('galaxyUnlocked','yes')}catch(e){}
-}else{
-document.getElementById('gateStatus').textContent='Mật khẩu chưa đúng. Vui lòng thử lại.';
-}
-}
-document.getElementById('visitorPassword').addEventListener('keydown',e=>{if(e.key==='Enter')unlockSite()});
-try{if(sessionStorage.getItem('galaxyUnlocked')==='yes')document.getElementById('accessGate').style.display='none'}catch(e){}
-
-// ADMIN
-function showAdminLogin(){document.getElementById('adminLoginModal').classList.add('show')}
-async function adminLogin(){
-const email=document.getElementById('adminUser').value.trim();
-const password=document.getElementById('adminPass').value;
-const status=document.getElementById('adminLoginStatus');
-status.textContent='Đang đăng nhập...';
-try{
-await auth.signInWithEmailAndPassword(email,password);
-closeModal('adminLoginModal');
-document.getElementById('adminPass').value='';
-status.textContent='';
-document.getElementById('accessGate').style.display='none';
-document.getElementById('adminModal').classList.add('show');
-fillLetterForm();renderAdminList();
-}catch(error){
-status.textContent='Đăng nhập không thành công. Hãy kiểm tra email, mật khẩu và kết nối mạng.';
-}
-}
-function closeAdmin(){closeModal('adminModal')}
-function closeModal(id){document.getElementById(id).classList.remove('show')}
-function closeLetter(){
-closeModal('letterModal');
-document.getElementById('envelope').classList.remove('open');
-}
-
-
-// LỜI NHẮN CHUNG — ĐỒNG BỘ FIRESTORE
-const LETTER_KEY='galaxy_10a6_letter_v1';
-const DEFAULT_LETTER={
-title:'Gửi tập thể 10A6,',
-body:'Tuổi học trò là một hành trình thật đặc biệt. Cảm ơn vì chúng ta đã cùng nhau tạo nên những khoảnh khắc đáng nhớ, những tiếng cười và cả những kỷ niệm không thể thay thế.\nMong mỗi thành viên của 10A6 luôn tự tin theo đuổi ước mơ, giữ gìn tình bạn đẹp và có thật nhiều niềm vui trên chặng đường phía trước.\nDù sau này mỗi người có một hướng đi riêng, hy vọng chúng ta vẫn sẽ nhớ về nhau bằng những điều thật đẹp.',
-sign:'10A6 — mỗi người một vì sao, cùng tạo nên một bầu trời. ✨'
-};
-let memoryLetter=null;
-function getLetter(){return letterCache||memoryLetter||DEFAULT_LETTER}
-function renderLetter(){
-const l=getLetter();
-document.getElementById('letterTitle').textContent=l.title;
-document.getElementById('letterBody').textContent=l.body;
-document.getElementById('letterSign').firstChild.textContent=l.sign;
-}
-function fillLetterForm(){
-const l=getLetter();
-document.getElementById('letterTitleInput').value=l.title;
-document.getElementById('letterBodyInput').value=l.body;
-document.getElementById('letterSignInput').value=l.sign;
-}
-async function saveLetter(){
-const data={
-title:document.getElementById('letterTitleInput').value.trim()||DEFAULT_LETTER.title,
-body:document.getElementById('letterBodyInput').value.trim()||DEFAULT_LETTER.body,
-sign:document.getElementById('letterSignInput').value.trim()
-};
-const st=document.getElementById('letterStatus');
 try{await letterRef.set(data);letterCache=data;memoryLetter=data;st.textContent='Đã lưu và đồng bộ lời nhắn chung!';renderLetter();}
 catch(e){st.textContent='Không thể lưu lên Firebase. Hãy kiểm tra đăng nhập quản trị và Rules.';}
 }
@@ -561,305 +348,77 @@ async function resetLetter(){
 const st=document.getElementById('letterStatus');
 try{await letterRef.set(DEFAULT_LETTER);letterCache=DEFAULT_LETTER;memoryLetter=null;fillLetterForm();renderLetter();st.textContent='Đã khôi phục lời nhắn mặc định trên tất cả thiết bị.';}
 catch(e){st.textContent='Không thể khôi phục. Hãy kiểm tra đăng nhập và kết nối.';}
-!-- TRÌNH PHÁT NHẠC -->
-<button class="music-fab" id="musicFab" onclick="toggleMusicPanel()" aria-label="Chọn nhạc">🎵</button>
-<div class="music-panel" id="musicPanel">
-<h3>🎵 Chọn nhạc</h3>
-<div class="song-list" id="musicList"></div>
-<div class="player-ctrl">
-<button onclick="prevSong()" aria-label="Bài trước">⏮</button>
-<button onclick="togglePlay()" id="playBtn" aria-label="Phát/Tạm dừng">▶</button>
-<button onclick="nextSong()" aria-label="Bài sau">⏭</button>
-<input type="range" id="vol" min="0" max="1" step="0.05" value="0.7" oninput="setVolume(this.value)" aria-label="Âm lượng">
-</div>
-<div class="now" id="nowPlaying"></div>
-</div>
-
-<!-- ĐĂNG NHẬP ADMIN -->
-<div class="modal" id="adminLoginModal">
-<div class="panel" style="max-width:390px">
-<button class="close" onclick="closeModal('adminLoginModal')">×</button>
-<h2>🔐 Đăng nhập quản trị</h2>
-<label for="adminUser">Tên tài khoản</label>
-<input id="adminUser" type="text" placeholder="Tên tài khoản">
-<label for="adminPass">Mật khẩu quản trị</label>
-<input id="adminPass" type="password" placeholder="Mật khẩu">
-<div class="form-actions"><button class="primary" onclick="adminLogin()">Đăng nhập</button></div>
-<div class="status" id="adminLoginStatus"></div>
-</div>
-</div>
-
-<!-- BẢNG QUẢN TRỊ -->
-<div class="modal" id="adminModal">
-<div class="panel">
-<button class="close" onclick="closeAdmin()">×</button>
-<h2>🪐 Quản trị Galaxy Memories</h2>
-<p style="font-size:13px;color:#c7c6d4;line-height:1.6">Chỉnh sửa lời nhắn chung, thêm tên, ảnh và lời nhắn cho từng học sinh. Dữ liệu được lưu trên trình duyệt của thiết bị này.</p>
-<div class="admin-list" style="border-top:0;padding-top:0;margin-top:18px">
-<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:4px">💌 Lời nhắn chung (lá thư gửi cả lớp)</h3>
-<label for="letterTitleInput">Tiêu đề thư</label>
-<input id="letterTitleInput" type="text">
-<label for="letterBodyInput">Nội dung thư (xuống dòng để tách đoạn)</label>
-<textarea id="letterBodyInput" style="min-height:190px"></textarea>
-<label for="letterSignInput">Dòng ký tên / kết thư (in đậm)</label>
-<input id="letterSignInput" type="text">
-<div class="form-actions">
-<button class="primary" onclick="saveLetter()">💾 Lưu lời nhắn chung</button>
-<button onclick="resetLetter()">↺ Khôi phục mặc định</button>
-</div>
-<div class="status" id="letterStatus"></div>
-</div>
-<div class="admin-list">
-<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:4px">🎵 Nhạc cho khách chọn</h3>
-<label for="songTitle">Tên bài hát (có thể để trống)</label>
-<input id="songTitle" type="text" placeholder="Ví dụ: Bài hát của lớp">
-<label for="songFile">File nhạc (MP3, M4A, WAV, OGG — tối đa 20 MB)</label>
-<input id="songFile" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac,.flac,.opus,.wma">
-<div class="form-actions"><button class="primary" onclick="uploadSong()">＋ Tải nhạc lên</button></div>
-<div class="status" id="songStatus"></div>
-<div id="adminSongList"></div>
-</div>
-<div class="admin-list">
-<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:4px">🪐 Thêm học sinh</h3>
-<label for="studentName">Họ và tên học sinh</label>
-<input id="studentName" type="text" placeholder="Ví dụ: Nguyễn Văn A">
-<label for="studentWish">Lời chúc / lời nhắn</label>
-<textarea id="studentWish" placeholder="Viết lời chúc dành cho bạn ấy..."></textarea>
-<label for="studentImage">Ảnh học sinh</label>
-<input id="studentImage" type="file" accept="image/*">
-<div class="form-actions">
-<button class="primary" onclick="addStudent()">＋ Thêm học sinh</button>
-<button onclick="clearForm()">Xóa nội dung nhập</button>
-</div>
-<div class="status" id="adminStatus"></div>
-</div>
-<div class="admin-list">
-<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:8px">Danh sách hiện có</h3>
-<div id="adminStudentList"></div>
-</div>
-<p class="small">Lưu ý: ảnh và danh sách lưu trong trình duyệt hiện tại. Nhạc cũng được lưu trong trình duyệt này. Muốn người khác trên thiết bị khác cũng nhìn thấy, bạn cần đưa website và dữ liệu lên máy chủ/cơ sở dữ liệu trực tuyến.</p>
-</div>
-</div>
-
-<!-- LỜI NHẮN CHUNG -->
-<div class="modal" id="letterModal">
-<div class="letter">
-<button class="close" onclick="closeLetter()">×</button>
-<h2 id="letterTitle">Gửi tập thể 10A6,</h2>
-<p id="letterBody"></p>
-<p id="letterSign" style="margin-top:14px"><strong></strong></p>
-</div>
-</div>
-
-<!-- LỜI NHẮN RIÊNG -->
-<div class="modal" id="studentModal">
-<div class="letter">
-<button class="close" onclick="closeModal('studentModal')">×</button>
-<h2 id="studentModalName">Gửi bạn,</h2>
-<p id="studentModalWish"></p>
-</div>
-</div>
-
-<script>
-// BẦU TRỜI SAO
-const sky=document.getElementById('sky');
-for(let i=0;i<160;i++){
-const s=document.createElement('i');s.className='star';
-s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
-const z=Math.random()*2+1;s.style.width=z+'px';s.style.height=z+'px';
-s.style.animationDelay=Math.random()*4+'s';sky.appendChild(s);
-}
-setInterval(()=>{
-const s=document.createElement('div');s.className='shooting';
-s.style.left=(30+Math.random()*80)+'%';s.style.top=Math.random()*65+'%';
-document.body.appendChild(s);setTimeout(()=>s.remove(),1800);
-},3200);
-
-// CẤU HÌNH ĐĂNG NHẬP — CÓ THỂ ĐỔI TẠI ĐÂY
-const VISITOR_PASSWORD="10A6";
-const ADMIN_USERNAME="admin";
-const ADMIN_PASSWORD="Admin@10A6";
-
-// SO SÁNH KHÔNG PHÂN BIỆT HOA THƯỜNG
-function sameText(a,b){return String(a).trim().toLowerCase()===String(b).trim().toLowerCase()}
-
-// MẬT KHẨU TRUY CẬP
-function unlockSite(){
-const value=document.getElementById('visitorPassword').value;
-if(sameText(value,VISITOR_PASSWORD)){
-document.getElementById('accessGate').style.display='none';
-try{sessionStorage.setItem('galaxyUnlocked','yes')}catch(e){}
-}else{
-document.getElementById('gateStatus').textContent='Mật khẩu chưa đúng. Vui lòng thử lại.';
-}
-}
-document.getElementById('visitorPassword').addEventListener('keydown',e=>{if(e.key==='Enter')unlockSite()});
-try{if(sessionStorage.getItem('galaxyUnlocked')==='yes')document.getElementById('accessGate').style.display='none'}catch(e){}
-
-// ADMIN
-function showAdminLogin(){document.getElementById('adminLoginModal').classList.add('show')}
-function adminLogin(){
-const u=document.getElementById('adminUser').value;
-const p=document.getElementById('adminPass').value;
-if(sameText(u,ADMIN_USERNAME)&&sameText(p,ADMIN_PASSWORD)){
-closeModal('adminLoginModal');
-document.getElementById('adminPass').value='';
-document.getElementById('adminLoginStatus').textContent='';
-document.getElementById('accessGate').style.display='none';
-document.getElementById('adminModal').classList.add('show');
-fillLetterForm();renderAdminList();
-}else{
-document.getElementById('adminLoginStatus').textContent='Tên tài khoản hoặc mật khẩu không đúng.';
-}
-}
-function closeAdmin(){closeModal('adminModal')}
-function closeModal(id){document.getElementById(id).classList.remove('show')}
-function closeLetter(){
-closeModal('letterModal');
-document.getElementById('envelope').classList.remove('open');
 }
 
-
-// LỜI NHẮN CHUNG (lưu trên trình duyệt)
-const LETTER_KEY='galaxy_10a6_letter_v1';
-const DEFAULT_LETTER={
-title:'Gửi tập thể 10A6,',
-body:'Tuổi học trò là một hành trình thật đặc biệt. Cảm ơn vì chúng ta đã cùng nhau tạo nên những khoảnh khắc đáng nhớ, những tiếng cười và cả những kỷ niệm không thể thay thế.\nMong mỗi thành viên của 10A6 luôn tự tin theo đuổi ước mơ, giữ gìn tình bạn đẹp và có thật nhiều niềm vui trên chặng đường phía trước.\nDù sau này mỗi người có một hướng đi riêng, hy vọng chúng ta vẫn sẽ nhớ về nhau bằng những điều thật đẹp.',
-sign:'10A6 — mỗi người một vì sao, cùng tạo nên một bầu trời. ✨'
-};
-let memoryLetter=null;
-function getLetter(){
-try{const d=JSON.parse(localStorage.getItem(LETTER_KEY)||'null');if(d)return Object.assign({},DEFAULT_LETTER,d)}
-catch(e){if(memoryLetter)return memoryLetter}
-return memoryLetter||DEFAULT_LETTER;
-}
-function renderLetter(){
-const l=getLetter();
-document.getElementById('letterTitle').textContent=l.title;
-document.getElementById('letterBody').textContent=l.body;
-document.getElementById('letterSign').firstChild.textContent=l.sign;
-}
-function fillLetterForm(){
-const l=getLetter();
-document.getElementById('letterTitleInput').value=l.title;
-document.getElementById('letterBodyInput').value=l.body;
-document.getElementById('letterSignInput').value=l.sign;
-}
-function saveLetter(){
-const data={
-title:document.getElementById('letterTitleInput').value.trim()||DEFAULT_LETTER.title,
-body:document.getElementById('letterBodyInput').value.trim()||DEFAULT_LETTER.body,
-sign:document.getElementById('letterSignInput').value.trim()
-};
-memoryLetter=data;
-const st=document.getElementById('letterStatus');
-try{localStorage.setItem(LETTER_KEY,JSON.stringify(data));st.textContent='Đã lưu lời nhắn chung!'}
-catch(e){st.textContent='Đã cập nhật tạm thời nhưng không lưu được vào trình duyệt.'}
-renderLetter();
-}
-function resetLetter(){
-memoryLetter=null;
-try{localStorage.removeItem(LETTER_KEY)}catch(e){}
-fillLetterForm();renderLetter();
-document.getElementById('letterStatus').textContent='Đã khôi phục lời nhắn mặc định.';
-}
-
-// DỮ LIỆU HỌC SINH (lưu trên trình duyệt)
+// DANH SÁCH HỌC SINH — ĐỒNG BỘ FIRESTORE
 const STORAGE_KEY='galaxy_10a6_students_v1';
-let memoryStudents=[];
-function getStudents(){
-try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch(e){return memoryStudents}
+function getStudents(){return studentsCache}
+async function saveStudents(data){
+const batch=db.batch();
+const snap=await studentsRef.get();
+snap.forEach(d=>{if(!data.some(x=>x.id===d.id))batch.delete(d.ref)});
+data.forEach(item=>{const ref=studentsRef.doc(String(item.id));const payload={name:item.name,wish:item.wish,image:item.image||'',updatedAt:firebase.firestore.FieldValue.serverTimestamp()};batch.set(ref,payload)});
+await batch.commit();
 }
-function saveStudents(data){
-memoryStudents=data;
-try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data))}
-catch(e){
-if(e&&(e.name==='QuotaExceededError'||e.code===22))throw e;
-}
-}
-
-function addStudent(){
+async function addStudent(){
 const name=document.getElementById('studentName').value.trim();
 const wish=document.getElementById('studentWish').value.trim();
 const file=document.getElementById('studentImage').files[0];
 const status=document.getElementById('adminStatus');
 if(!name){status.textContent='Bạn hãy nhập họ tên học sinh.';return}
-const finish=(imageData)=>{
-const students=getStudents();
-students.push({id:Date.now().toString(),name,wish:wish||'Chúc bạn luôn vui vẻ, tự tin và gặp nhiều điều tốt đẹp! ✨',image:imageData||''});
+const finish=async(imageData)=>{
 try{
-saveStudents(students);clearForm();renderStudents();renderAdminList();
-status.textContent='Đã thêm học sinh thành công!';
-}catch(err){
-status.textContent='Không thể lưu. Có thể ảnh quá lớn; hãy chọn ảnh dung lượng nhỏ hơn.';
-}
+if(imageData && imageData.length>700000){status.textContent='Ảnh sau khi nén vẫn còn lớn. Hãy chọn ảnh có dung lượng nhỏ hơn.';return}
+const id=Date.now().toString();
+await studentsRef.doc(id).set({name,wish:wish||'Chúc bạn luôn vui vẻ, tự tin và gặp nhiều điều tốt đẹp! ✨',image:imageData||'',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+clearForm();status.textContent='Đã thêm học sinh và đồng bộ thành công!';
+}catch(err){status.textContent='Không thể lưu. Kiểm tra kết nối, quyền Firestore và thử ảnh nhỏ hơn.';}
 };
 if(file){
-status.textContent='Đang xử lý ảnh...';
-const reader=new FileReader();
-reader.onerror=()=>{status.textContent='Không đọc được ảnh.'};
-reader.onload=()=>{
-const im=new Image();
-im.onload=()=>{
-const max=500,r=Math.min(1,max/Math.max(im.width,im.height));
-const c=document.createElement('canvas');
-c.width=Math.round(im.width*r);c.height=Math.round(im.height*r);
-c.getContext('2d').drawImage(im,0,0,c.width,c.height);
-finish(c.toDataURL('image/jpeg',0.8));
-};
-im.onerror=()=>{status.textContent='Tệp này không phải ảnh hợp lệ (hãy dùng JPG hoặc PNG).'};
-im.src=reader.result;
-};
-reader.readAsDataURL(file);
+status.textContent='Đang xử lý và đồng bộ ảnh...';
+const reader=new FileReader();reader.onerror=()=>{status.textContent='Không đọc được ảnh.'};
+reader.onload=()=>{const im=new Image();im.onload=()=>{const max=500,r=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*r);c.height=Math.round(im.height*r);c.getContext('2d').drawImage(im,0,0,c.width,c.height);finish(c.toDataURL('image/jpeg',0.72));};im.onerror=()=>{status.textContent='Tệp này không phải ảnh hợp lệ.'};im.src=reader.result;};reader.readAsDataURL(file);
 }else finish('');
 }
-function clearForm(){
-document.getElementById('studentName').value='';
-document.getElementById('studentWish').value='';
-document.getElementById('studentImage').value='';
-}
-function deleteStudent(id){
-saveStudents(getStudents().filter(s=>s.id!==id));renderStudents();renderAdminList();
+function clearForm(){document.getElementById('studentName').value='';document.getElementById('studentWish').value='';document.getElementById('studentImage').value='';}
+async function deleteStudent(id){
+try{await studentsRef.doc(String(id)).delete();document.getElementById('adminStatus').textContent='Đã xóa học sinh trên hệ thống.';}
+catch(e){document.getElementById('adminStatus').textContent='Không thể xóa. Hãy kiểm tra quyền quản trị.';}
 }
 function renderAdminList(){
-const box=document.getElementById('adminStudentList'),students=getStudents();
-box.innerHTML='';
+const box=document.getElementById('adminStudentList'),students=getStudents();box.innerHTML='';
 if(!students.length){box.innerHTML='<p style="color:#bfc1d0;font-size:13px">Chưa có học sinh nào. Hãy thêm thành viên đầu tiên nhé!</p>';return}
 students.forEach(s=>{
-const row=document.createElement('div');row.className='admin-row';
-const img=document.createElement('img');img.alt='Ảnh '+s.name;if(s.image)img.src=s.image;
-const span=document.createElement('span');span.textContent=s.name;
-const del=document.createElement('button');del.textContent='Xóa';let armed=false,timer;
-del.onclick=()=>{
-if(armed){clearTimeout(timer);deleteStudent(s.id);return}
-armed=true;del.textContent='Chắc chắn?';del.classList.add('primary');
-timer=setTimeout(()=>{armed=false;del.textContent='Xóa';del.classList.remove('primary')},3000);
-};
+const row=document.createElement('div');row.className='admin-row';const img=document.createElement('img');img.alt='Ảnh '+s.name;if(s.image)img.src=s.image;
+const span=document.createElement('span');span.textContent=s.name;const del=document.createElement('button');del.textContent='Xóa';let armed=false,timer;
+del.onclick=()=>{if(armed){clearTimeout(timer);deleteStudent(s.id);return}armed=true;del.textContent='Chắc chắn?';del.classList.add('primary');timer=setTimeout(()=>{armed=false;del.textContent='Xóa';del.classList.remove('primary')},3000)};
 row.append(img,span,del);box.appendChild(row);
 });
 }
 function renderStudents(){
-const grid=document.getElementById('studentGrid'),students=getStudents();
-grid.innerHTML='';
-if(!students.length){
-grid.innerHTML='<div class="empty" style="grid-column:1/-1">🌟 Những vì sao của lớp 10A6 sẽ xuất hiện tại đây.<br>Quản trị viên hãy đăng nhập để thêm tên, hình ảnh và lời nhắn cho các thành viên nhé!</div>';
-return;
-}
+const grid=document.getElementById('studentGrid'),students=getStudents();grid.innerHTML='';
+if(!students.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">🌟 Những vì sao của lớp 10A6 sẽ xuất hiện tại đây.<br>Quản trị viên hãy đăng nhập để thêm tên, hình ảnh và lời nhắn cho các thành viên nhé!</div>';return;}
 students.forEach(s=>{
 const card=document.createElement('article');card.className='student-card';card.tabIndex=0;
-if(s.image){
-const img=document.createElement('img');img.className='student-photo';img.alt='Ảnh '+s.name;img.src=s.image;card.appendChild(img);
-}else{
-const ph=document.createElement('div');ph.className='student-photo';ph.textContent='🌟';card.appendChild(ph);
-}
-const name=document.createElement('h3');name.className='student-name';name.textContent=s.name;
-const wish=document.createElement('p');wish.className='student-wish';wish.textContent=s.wish;
-card.append(name,wish);
-card.addEventListener('click',()=>showStudent(s));
-card.addEventListener('keydown',e=>{if(e.key==='Enter')showStudent(s)});
-grid.appendChild(card);
+if(s.image){const img=document.createElement('img');img.className='student-photo';img.alt='Ảnh '+s.name;img.src=s.image;card.appendChild(img);}else{const ph=document.createElement('div');ph.className='student-photo';ph.textContent='🌟';card.appendChild(ph);}
+const name=document.createElement('h3');name.className='student-name';name.textContent=s.name;const wish=document.createElement('p');wish.className='student-wish';wish.textContent=s.wish;card.append(name,wish);
+card.addEventListener('click',()=>showStudent(s));card.addEventListener('keydown',e=>{if(e.key==='Enter')showStudent(s)});grid.appendChild(card);
 });
 }
+function startFirebaseSync(){
+if(!db || !studentsRef || !letterRef){console.error('Firebase unavailable; sync skipped.');return;}
+// Lắng nghe thay đổi trực tiếp để các thiết bị tự cập nhật.
+studentsRef.orderBy('name').onSnapshot(async snap=>{
+ studentsCache=snap.docs.map(d=>({id:d.id,...d.data()}));renderStudents();renderAdminList();
+ if(!firebaseReady){firebaseReady=true;if(snap.empty){let old=[];try{old=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch(e){}if(old.length){for(const item of old){const id=String(item.id||Date.now()+Math.random());await studentsRef.doc(id).set({name:item.name||'',wish:item.wish||'',image:item.image||''});}}}
+ }
+},err=>{document.getElementById('studentGrid').innerHTML='<div class="empty" style="grid-column:1/-1">Không tải được dữ liệu. Vui lòng thử tải lại trang.</div>';});
+letterRef.onSnapshot(async doc=>{
+ if(doc.exists){letterCache=doc.data();renderLetter();}
+ else if(!window._letterSeeded){window._letterSeeded=true;let old=null;try{old=JSON.parse(localStorage.getItem(LETTER_KEY)||'null')}catch(e){}await letterRef.set(old||DEFAULT_LETTER).catch(()=>{});}
+},()=>{renderLetter()});
+}
+
 function showStudent(s){
 document.getElementById('studentModalName').textContent='Gửi '+s.name+',';
 document.getElementById('studentModalWish').textContent=s.wish;
@@ -976,7 +535,7 @@ URL.revokeObjectURL(urlCache.get(sg.id));urlCache.delete(sg.id);
 await songDel(sg.id);await loadSongs();
 }
 
-renderLetter();renderStudents();loadSongs();
+renderLetter();renderStudents();loadSongs();startFirebaseSync();
 </script>
 </body>
 </html>
