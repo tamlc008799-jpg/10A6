@@ -249,6 +249,229 @@ const firebaseConfig = {
   messagingSenderId: "718331576098",
   appId: "1:718331576098:web:38609f42da31b1790c6f7b"
 };
+// Khởi tạo Firebase an toàn: nếu CDN/kết nối Firebase lỗi, cổng khách vẫn hoạt động.
+let auth = null, db = null, studentsRef = null, letterRef = null;
+let firebaseInitError = null;
+try {
+  if (!window.firebase || !firebase.initializeApp) throw new Error('Không tải được Firebase SDK.');
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+  db = firebase.firestore();
+  studentsRef = db.collection('students');
+  letterRef = db.collection('site_content').doc('letter');
+} catch (e) {
+  firebaseInitError = e;
+  console.error('Firebase initialization failed:', e);
+}
+let firebaseReady = false;
+let studentsCache = [];
+let letterCache = null;
+
+const VISITOR_PASSWORD="10A6";
+
+// SO SÁNH KHÔNG PHÂN BIỆT HOA THƯỜNG
+function sameText(a,b){return String(a).trim().toLowerCase()===String(b).trim().toLowerCase()}
+
+// MẬT KHẨU TRUY CẬP
+function unlockSite(){
+const value=document.getElementById('visitorPassword').value;
+if(sameText(value,VISITOR_PASSWORD)){
+document.getElementById('accessGate').style.display='none';
+try{sessionStorage.setItem('galaxyUnlocked','yes')}catch(e){}
+}else{
+document.getElementById('gateStatus').textContent='Mật khẩu chưa đúng. Vui lòng thử lại.';
+}
+}
+document.getElementById('visitorPassword').addEventListener('keydown',e=>{if(e.key==='Enter')unlockSite()});
+try{if(sessionStorage.getItem('galaxyUnlocked')==='yes')document.getElementById('accessGate').style.display='none'}catch(e){}
+
+// ADMIN
+function showAdminLogin(){document.getElementById('adminLoginModal').classList.add('show')}
+async function adminLogin(){
+if(!auth){document.getElementById('adminLoginStatus').textContent='Không kết nối được Firebase. Hãy kiểm tra mạng hoặc tải lại trang.';return;}
+const email=document.getElementById('adminUser').value.trim();
+const password=document.getElementById('adminPass').value;
+const status=document.getElementById('adminLoginStatus');
+status.textContent='Đang đăng nhập...';
+try{
+await auth.signInWithEmailAndPassword(email,password);
+closeModal('adminLoginModal');
+document.getElementById('adminPass').value='';
+status.textContent='';
+document.getElementById('accessGate').style.display='none';
+document.getElementById('adminModal').classList.add('show');
+fillLetterForm();renderAdminList();
+}catch(error){
+status.textContent='Đăng nhập không thành công. Hãy kiểm tra email, mật khẩu và kết nối mạng.';
+}
+}
+function closeAdmin(){closeModal('adminModal')}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+function closeLetter(){
+closeModal('letterModal');
+document.getElementById('envelope').classList.remove('open');
+}
+
+
+// LỜI NHẮN CHUNG — ĐỒNG BỘ FIRESTORE
+const LETTER_KEY='galaxy_10a6_letter_v1';
+const DEFAULT_LETTER={
+title:'Gửi tập thể 10A6,',
+body:'Tuổi học trò là một hành trình thật đặc biệt. Cảm ơn vì chúng ta đã cùng nhau tạo nên những khoảnh khắc đáng nhớ, những tiếng cười và cả những kỷ niệm không thể thay thế.\nMong mỗi thành viên của 10A6 luôn tự tin theo đuổi ước mơ, giữ gìn tình bạn đẹp và có thật nhiều niềm vui trên chặng đường phía trước.\nDù sau này mỗi người có một hướng đi riêng, hy vọng chúng ta vẫn sẽ nhớ về nhau bằng những điều thật đẹp.',
+sign:'10A6 — mỗi người một vì sao, cùng tạo nên một bầu trời. ✨'
+};
+let memoryLetter=null;
+function getLetter(){return letterCache||memoryLetter||DEFAULT_LETTER}
+function renderLetter(){
+const l=getLetter();
+document.getElementById('letterTitle').textContent=l.title;
+document.getElementById('letterBody').textContent=l.body;
+document.getElementById('letterSign').firstChild.textContent=l.sign;
+}
+function fillLetterForm(){
+const l=getLetter();
+document.getElementById('letterTitleInput').value=l.title;
+document.getElementById('letterBodyInput').value=l.body;
+document.getElementById('letterSignInput').value=l.sign;
+}
+async function saveLetter(){
+const data={
+title:document.getElementById('letterTitleInput').value.trim()||DEFAULT_LETTER.title,
+body:document.getElementById('letterBodyInput').value.trim()||DEFAULT_LETTER.body,
+sign:document.getElementById('letterSignInput').value.trim()
+};
+const st=document.getElementById('letterStatus');
+try{await letterRef.set(data);letterCache=datnh cho tất cả chúng ta.</p>
+<div class="envelope" id="envelope" onclick="showLetter()">
+<div class="env-back"></div><div class="env-front"></div><div class="env-flap"></div><div class="seal">✦</div>
+</div>
+<p class="hint">Chạm vào phong thư để mở lời nhắn</p>
+</div>
+</main>
+
+<!-- TRÌNH PHÁT NHẠC -->
+<button class="music-fab" id="musicFab" onclick="toggleMusicPanel()" aria-label="Chọn nhạc">🎵</button>
+<div class="music-panel" id="musicPanel">
+<h3>🎵 Chọn nhạc</h3>
+<div class="song-list" id="musicList"></div>
+<div class="player-ctrl">
+<button onclick="prevSong()" aria-label="Bài trước">⏮</button>
+<button onclick="togglePlay()" id="playBtn" aria-label="Phát/Tạm dừng">▶</button>
+<button onclick="nextSong()" aria-label="Bài sau">⏭</button>
+<input type="range" id="vol" min="0" max="1" step="0.05" value="0.7" oninput="setVolume(this.value)" aria-label="Âm lượng">
+</div>
+<div class="now" id="nowPlaying"></div>
+</div>
+
+<!-- ĐĂNG NHẬP ADMIN -->
+<div class="modal" id="adminLoginModal">
+<div class="panel" style="max-width:390px">
+<button class="close" onclick="closeModal('adminLoginModal')">×</button>
+<h2>🔐 Đăng nhập quản trị</h2>
+<label for="adminUser">Email quản trị viên</label>
+<input id="adminUser" type="text" placeholder="Nhập email Firebase" autocomplete="username">
+<label for="adminPass">Mật khẩu quản trị</label>
+<input id="adminPass" type="password" placeholder="Mật khẩu">
+<div class="form-actions"><button class="primary" onclick="adminLogin()">Đăng nhập</button></div>
+<div class="status" id="adminLoginStatus"></div>
+</div>
+</div>
+
+<!-- BẢNG QUẢN TRỊ -->
+<div class="modal" id="adminModal">
+<div class="panel">
+<button class="close" onclick="closeAdmin()">×</button>
+<h2>🪐 Quản trị Galaxy Memories</h2>
+<p style="font-size:13px;color:#c7c6d4;line-height:1.6">Chỉnh sửa lời nhắn chung, thêm tên, ảnh và lời nhắn cho từng học sinh. Dữ liệu được đồng bộ trực tuyến qua Firebase.</p>
+<div class="admin-list" style="border-top:0;padding-top:0;margin-top:18px">
+<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:4px">💌 Lời nhắn chung (lá thư gửi cả lớp)</h3>
+<label for="letterTitleInput">Tiêu đề thư</label>
+<input id="letterTitleInput" type="text">
+<label for="letterBodyInput">Nội dung thư (xuống dòng để tách đoạn)</label>
+<textarea id="letterBodyInput" style="min-height:190px"></textarea>
+<label for="letterSignInput">Dòng ký tên / kết thư (in đậm)</label>
+<input id="letterSignInput" type="text">
+<div class="form-actions">
+<button class="primary" onclick="saveLetter()">💾 Lưu lời nhắn chung</button>
+<button onclick="resetLetter()">↺ Khôi phục mặc định</button>
+</div>
+<div class="status" id="letterStatus"></div>
+</div>
+<div class="admin-list">
+<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:4px">🎵 Nhạc cho khách chọn</h3>
+<label for="songTitle">Tên bài hát (có thể để trống)</label>
+<input id="songTitle" type="text" placeholder="Ví dụ: Bài hát của lớp">
+<label for="songFile">File nhạc (MP3, M4A, WAV, OGG — tối đa 20 MB)</label>
+<input id="songFile" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac,.flac,.opus,.wma">
+<div class="form-actions"><button class="primary" onclick="uploadSong()">＋ Tải nhạc lên</button></div>
+<div class="status" id="songStatus"></div>
+<div id="adminSongList"></div>
+</div>
+<div class="admin-list">
+<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:4px">🪐 Thêm học sinh</h3>
+<label for="studentName">Họ và tên học sinh</label>
+<input id="studentName" type="text" placeholder="Ví dụ: Nguyễn Văn A">
+<label for="studentWish">Lời chúc / lời nhắn</label>
+<textarea id="studentWish" placeholder="Viết lời chúc dành cho bạn ấy..."></textarea>
+<label for="studentImage">Ảnh học sinh</label>
+<input id="studentImage" type="file" accept="image/*">
+<div class="form-actions">
+<button class="primary" onclick="addStudent()">＋ Thêm học sinh</button>
+<button onclick="clearForm()">Xóa nội dung nhập</button>
+</div>
+<div class="status" id="adminStatus"></div>
+</div>
+<div class="admin-list">
+<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:8px">Danh sách hiện có</h3>
+<div id="adminStudentList"></div>
+</div>
+<p class="small">Danh sách học sinh và lời nhắn chung được đồng bộ qua Firebase. Nhạc tải lên vẫn chỉ lưu trên thiết bị hiện tại; muốn đồng bộ nhạc cần lưu file nhạc ở dịch vụ lưu trữ trực tuyến riêng.</p>
+</div>
+</div>
+
+<!-- LỜI NHẮN CHUNG -->
+<div class="modal" id="letterModal">
+<div class="letter">
+<button class="close" onclick="closeLetter()">×</button>
+<h2 id="letterTitle">Gửi tập thể 10A6,</h2>
+<p id="letterBody"></p>
+<p id="letterSign" style="margin-top:14px"><strong></strong></p>
+</div>
+</div>
+
+<!-- LỜI NHẮN RIÊNG -->
+<div class="modal" id="studentModal">
+<div class="letter">
+<button class="close" onclick="closeModal('studentModal')">×</button>
+<h2 id="studentModalName">Gửi bạn,</h2>
+<p id="studentModalWish"></p>
+</div>
+</div>
+
+<script>
+// BẦU TRỜI SAO
+const sky=document.getElementById('sky');
+for(let i=0;i<160;i++){
+const s=document.createElement('i');s.className='star';
+s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
+const z=Math.random()*2+1;s.style.width=z+'px';s.style.height=z+'px';
+s.style.animationDelay=Math.random()*4+'s';sky.appendChild(s);
+}
+setInterval(()=>{
+const s=document.createElement('div');s.className='shooting';
+s.style.left=(30+Math.random()*80)+'%';s.style.top=Math.random()*65+'%';
+document.body.appendChild(s);setTimeout(()=>s.remove(),1800);
+},3200);
+
+// KẾT NỐI FIREBASE
+const firebaseConfig = {
+  apiKey: "AIzaSyDq2V9UbaT1XK0HabIR4zcxh6N_wjKSk3s",
+  authDomain: "galaxy-memories-10a6-91626.firebaseapp.com",
+  projectId: "galaxy-memories-10a6-91626",
+  storageBucket: "galaxy-memories-10a6-91626.firebasestorage.app",
+  messagingSenderId: "718331576098",
+  appId: "1:718331576098:web:38609f42da31b1790c6f7b"
+};
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
