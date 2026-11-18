@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <title>Galaxy Memories - 10A6 ✨</title>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -10,7 +13,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 <style>
 :root{--gold:#f6d99a;--cream:#fff0d0;--navy:#071020;--purple:#9b79df}
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Be Vietnam Pro","Segoe UI",Arial,sans-serif!important}
 body{min-height:100vh;background:radial-gradient(ellipse at 50% 35%,#20284a 0%,#0b1227 48%,#02050d 100%);color:#fff;font-family:Arial,sans-serif;overflow-x:hidden}
 #sky{position:fixed;inset:0;pointer-events:none;z-index:0}
 .star{position:absolute;border-radius:50%;background:#fff5d8;box-shadow:0 0 7px 2px #f6d99a;animation:blink 2.5s infinite alternate}
@@ -35,6 +38,7 @@ button.primary{background:linear-gradient(135deg,#7555bb,#33265e);border-color:#
 .student-photo{height:190px;width:100%;object-fit:cover;border-radius:8px;background:linear-gradient(135deg,#5b527c,#1c3850);display:flex;align-items:center;justify-content:center;font-size:55px;color:#f5dca7}
 .student-name{font:20px Georgia,serif;color:#f8e4b5;margin:13px 0 8px;overflow-wrap:anywhere}
 .student-wish{font-size:13px;line-height:1.65;color:#d8d9e6;overflow-wrap:anywhere}
+.student-card-hint{font-size:11px;color:#c9b78f;letter-spacing:.3px;margin-top:8px}
 .empty{padding:35px 15px;border:1px dashed #bda46d77;border-radius:14px;color:#c6c4d2;line-height:1.8}
 .envelope-area{margin:50px auto 0}
 @keyframes shakeEnv{0%,100%{transform:rotate(0deg)}20%{transform:rotate(-4deg)}40%{transform:rotate(4deg)}60%{transform:rotate(-3deg)}80%{transform:rotate(3deg)}}
@@ -428,8 +432,13 @@ if(!students.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1"
 students.forEach(s=>{
 const card=document.createElement('article');card.className='student-card';card.tabIndex=0;
 if(s.image){const img=document.createElement('img');img.className='student-photo';img.alt='Ảnh '+s.name;img.src=s.image;card.appendChild(img);}else{const ph=document.createElement('div');ph.className='student-photo';ph.textContent='🌟';card.appendChild(ph);}
-const name=document.createElement('h3');name.className='student-name';name.textContent=s.name;const wish=document.createElement('p');wish.className='student-wish';wish.textContent=s.wish;card.append(name,wish);
-card.addEventListener('click',()=>showStudent(s));card.addEventListener('keydown',e=>{if(e.key==='Enter')showStudent(s)});grid.appendChild(card);
+const name=document.createElement('h3');name.className='student-name';name.textContent=s.name;
+const hint=document.createElement('p');hint.className='student-card-hint';hint.textContent='✦ Chạm vào để mở lời nhắn ✦';
+card.setAttribute('role','button');card.setAttribute('aria-label','Mở lời nhắn dành cho '+s.name);
+card.append(name,hint);
+card.addEventListener('click',()=>showStudent(s));
+card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showStudent(s)}});
+grid.appendChild(card);
 });
 }
 function startFirebaseSync(){
