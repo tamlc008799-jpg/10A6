@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galaxy Memories - 10A6 ✨</title>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+<style>
+:root{--gold:#f6d99a;--cream:#fff0d0;--navy:#071020;--purple:#9b79df}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:radial-gradient(ellipse at 50% 35%,#20284a 0%,#0b1227 48%,#02050d 100%);color:#fff;font-family:Arial,sans-serif;overflow-x:hidden}
+#sky{position:fixed;inset:0;pointer-events:none;z-index:0}
+.star{position:absolute;border-radius:50%;background:#fff5d8;box-shadow:0 0 7px 2px #f6d99a;animation:blink 2.5s infinite alternate}
+@keyframes blink{from{opacity:.15;transform:scale(.7)}to{opacity:1;transform:scale(1.4)}}
+.shooting{position:fixed;width:110px;height:1px;background:linear-gradient(90deg,#fff4d1,transparent);transform:rotate(-35deg);animation:shoot 1.7s linear forwards;pointer-events:none;z-index:1}
+@keyframes shoot{to{transform:translate(-420px,260px) rotate(-35deg);opacity:0}}
+main{position:relative;z-index:2;max-width:1100px;margin:auto;padding:38px 18px 90px;text-align:center}
+.kicker{font-size:11px;letter-spacing:5px;color:#c7b58e;text-transform:uppercase;margin:16px 0}
+h1{font-family:Georgia,serif;font-size:clamp(29px,6vw,49px);font-weight:normal;color:#f7dfad;text-shadow:0 0 22px #c99d54;margin-bottom:12px}
+.subtitle{color:#d8d1c2;font-size:15px;line-height:1.8;max-width:650px;margin:0 auto 28px}
+.top-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:30px}
+#sessionBar{display:none;justify-content:center;gap:10px;align-items:center;flex-wrap:wrap;margin:-12px auto 24px;color:#d8d1c2;font-size:12px}
+#sessionBar.show{display:flex}
+button{border:1px solid #d9bd7d;background:linear-gradient(135deg,#263149,#111a2b);color:#f8e5b7;border-radius:28px;padding:11px 19px;font-size:14px;cursor:pointer;box-shadow:0 0 18px #d8ad5b25;transition:.2s}
+button:hover{transform:translateY(-2px);box-shadow:0 0 23px #e5c47b60}
+button.primary{background:linear-gradient(135deg,#7555bb,#33265e);border-color:#c5a8ff}
+.section-title{font:normal 25px Georgia,serif;color:#f5dca7;margin:34px 0 8px;text-shadow:0 0 15px #d5a95c}
+.section-note{font-size:13px;color:#bfc6d9;margin-bottom:20px}
+.student-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:20px;text-align:center}
+.student-card{position:relative;padding:12px 12px 18px;background:linear-gradient(145deg,#18243bdb,#11162cdb);border:1px solid #c4a66b66;border-radius:14px;box-shadow:0 0 22px #a98b5630;transition:.25s;overflow:hidden;cursor:pointer}
+.student-card:hover{transform:translateY(-6px);box-shadow:0 0 28px #b99bdb70}
+.student-photo{height:190px;width:100%;object-fit:cover;border-radius:8px;background:linear-gradient(135deg,#5b527c,#1c3850);display:flex;align-items:center;justify-content:center;font-size:55px;color:#f5dca7}
+.student-name{font:20px Georgia,serif;color:#f8e4b5;margin:13px 0 8px;overflow-wrap:anywhere}
+.student-wish{font-size:13px;line-height:1.65;color:#d8d9e6;overflow-wrap:anywhere}
+.empty{padding:35px 15px;border:1px dashed #bda46d77;border-radius:14px;color:#c6c4d2;line-height:1.8}
+.envelope-area{margin:50px auto 0}
+@keyframes shakeEnv{0%,100%{transform:rotate(0deg)}20%{transform:rotate(-4deg)}40%{transform:rotate(4deg)}60%{transform:rotate(-3deg)}80%{transform:rotate(3deg)}}
+.envelope{position:relative;width:190px;height:125px;margin:22px auto 15px;cursor:pointer;filter:drop-shadow(0 10px 20px #0009);transition:.3s;animation:shakeEnv 2.5s ease-in-out infinite}
+.envelope:hover{transform:translateY(-5px) scale(1.03);animation:none}
+.env-back{position:absolute;inset:0;background:#263b59;border:1px solid #8c795b;border-radius:4px}
+.env-front{position:absolute;inset:0;background:linear-gradient(145deg,#324c6d,#14243c);clip-path:polygon(0 0,50% 58%,100% 0,100% 100%,0 100%)}
+.env-flap{position:absolute;inset:0;background:#405a7b;clip-path:polygon(0 0,100% 0,50% 60%);transform-origin:top;transition:transform .8s;z-index:3}
+.seal{position:absolute;z-index:4;left:50%;top:58%;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;background:radial-gradient(circle,#f8e5b7,#a98a4f);color:#634b25;display:grid;place-items:center}
+.envelope.open .env-flap{transform:rotateX(180deg);z-index:0}
+.envelope.open{animation:none}
+.hint{font-size:13px;color:#c9c0ac}
+.modal{position:fixed;inset:0;background:#020611e8;backdrop-filter:blur(8px);z-index:60;display:none;align-items:center;justify-content:center;padding:15px}
+.modal.show{display:flex}
+.panel{position:relative;width:min(620px,100%);max-height:92vh;overflow:auto;padding:28px 22px;background:linear-gradient(145deg,#18243b,#0c1326);border:1px solid #c4a66b99;border-radius:18px;box-shadow:0 0 45px #a98b5655;text-align:left}
+.panel h2{font:normal 26px Georgia,serif;color:#f5dca7;margin:0 35px 18px 0}
+.close{position:absolute;right:13px;top:12px;border:0;background:transparent;font-size:25px;padding:3px 10px;box-shadow:none}
+label{display:block;color:#ddd4bd;font-size:13px;margin:13px 0 6px}
+input[type=text],input[type=password],textarea{width:100%;padding:12px;border-radius:9px;border:1px solid #8e80a9;background:#090f20;color:white;outline:none;font:14px Arial}
+textarea{min-height:80px;resize:vertical}
+input[type=file]{width:100%;color:#d7d1e2;font-size:13px}
+.form-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.status{min-height:20px;color:#ffd48d;font-size:13px;margin-top:10px;line-height:1.5}
+.admin-list{margin-top:20px;border-top:1px solid #ffffff22;padding-top:14px}
+.admin-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #ffffff18}
+.admin-row img{width:45px;height:45px;object-fit:cover;border-radius:7px;background:#303653}
+.admin-row span{flex:1;font-size:13px;overflow-wrap:anywhere}
+.admin-row button{padding:7px 10px;font-size:12px}
+.letter{background:linear-gradient(135deg,#fff5df,#ead9b8);color:#35435a;border:1px solid #c5a979;padding:35px 28px;border-radius:4px;max-width:460px;width:100%;max-height:90vh;overflow:auto;position:relative}
+.letter h2{font:italic 28px Georgia,serif;margin:10px 0 20px}
+.letter p{white-space:pre-line;font:16px/1.9 Georgia,serif}
+.letter .close{color:#6d5b43}
+#accessGate{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at center,#20284a,#080d1c 65%,#02050d)}
+.gate-card{width:min(390px,100%);padding:32px 25px;text-align:center;border:1px solid #c4a66b99;border-radius:20px;background:#111a2ddd;box-shadow:0 0 45px #a98b5644;backdrop-filter:blur(12px)}
+.gate-card .big{font-size:48px;margin-bottom:12px}
+.gate-card h2{font:normal 26px Georgia,serif;color:#f5dca7;margin-bottom:10px}
+.gate-card p{font-size:13px;color:#c9c8d5;line-height:1.6;margin-bottom:15px}
+.gate-card input{text-align:center;letter-spacing:3px}
+.gate-card button{margin-top:13px;width:100%}
+.gate-admin{margin-top:18px!important;background:transparent!important;border:0!important;box-shadow:none!important;color:#b9afd0!important;text-decoration:underline;padding:5px!important}
+.small{font-size:11px;color:#9298ad;line-height:1.5;margin-top:13px}
+.music-fab{position:fixed;left:16px;bottom:16px;z-index:40;width:50px;height:50px;border-radius:50%;padding:0;font-size:22px;background:linear-gradient(135deg,#7555bb,#33265e);border-color:#c5a8ff}
+.music-fab.playing{animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 12px #c5a8ff60}50%{box-shadow:0 0 26px #c5a8ffcc}}
+.music-panel{position:fixed;left:16px;bottom:76px;z-index:40;width:min(310px,calc(100vw - 32px));padding:16px;background:linear-gradient(145deg,#18243bf2,#0c1326f2);border:1px solid #c4a66b99;border-radius:16px;box-shadow:0 0 30px #00000090;backdrop-filter:blur(10px);display:none;text-align:left}
+.music-panel.show{display:block}
+.music-panel h3{font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:10px}
+.song-list{max-height:190px;overflow:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.song{width:100%;text-align:left;border-radius:10px;padding:9px 12px;font-size:13px;overflow-wrap:anywhere;box-shadow:none}
+.song.active{background:linear-gradient(135deg,#7555bb,#33265e);border-color:#c5a8ff}
+.player-ctrl{display:flex;align-items:center;gap:8px}
+.player-ctrl button{padding:8px 12px;font-size:15px}
+.player-ctrl input[type=range]{flex:1;accent-color:#c5a8ff}
+.now{font-size:12px;color:#c9c0ac;margin-top:9px;min-height:16px}
+@media(max-width:560px){main{padding-top:25px}.student-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.student-photo{height:145px}.student-name{font-size:17px}.panel{padding:25px 16px}}
+</style>
+</head>
+<body>
+<div id="sky"></div>
+
+<!-- CỔNG MẬT KHẨU -->
+<div id="accessGate">
+<div class="gate-card">
+<div class="big">🌌</div>
+<h2>Galaxy Memories</h2>
+<p>Chào mừng bạn đến với vũ trụ kỷ niệm của tập thể 10A6.
+Vui lòng nhập mật khẩu để tiếp tục.</p>
+<input id="visitorPassword" type="password" placeholder="Nhập mật khẩu truy cập" autocomplete="off">
+<button onclick="unlockSite()">✨ Khám phá vũ trụ</button>
+<button class="gate-admin" onclick="showAdminLogin()">Đăng nhập quản trị viên</button>
+<div class="status" id="gateStatus"></div>
+</div>
+</div>
+
+<main>
+<div class="kicker">our little universe · class 10A6</div>
+<h1>Galaxy Memories ✦</h1>
+<p class="subtitle">Mỗi người là một vì sao, mỗi kỷ niệm là một ánh sáng riêng. Chào mừng bạn đến với vũ trụ nhỏ của tập thể 10A6.</p>
+<div class="top-actions">
+<button onclick="showLetter()">💌 Lời nhắn chung</button>
+</div>
+<div id="sessionBar"><span id="sessionLabel">Đang truy cập</span><button onclick="logoutMember()">🚪 Đăng xuất</button><button id="adminLogoutTop" onclick="logoutAdmin()" style="display:none">🚪 Đăng xuất quản trị</button></div>
+<h2 class="section-title">✨ Những vì sao của 10A6</h2>
+<p class="section-note">Chạm vào từng thành viên để đọc lời nhắn dành riêng.</p>
+<section class="student-grid" id="studentGrid"></section>
+<div class="envelope-area">
+<h2 class="section-title">💌 Một lá thư gửi cả lớp</h2>
+<p class="section-note">Một vài dòng nhỏ dành cho tất cả chúng ta.</p>
+<div class="envelope" id="envelope" onclick="showLetter()">
+<div class="env-back"></div><div class="env-front"></div><div class="env-flap"></div><div class="seal">✦</div>
+</div>
+<p class="hint">Chạm vào phong thư để mở lời nhắn</p>
+</div>
+</main>
+
+<!-- TRÌNH PHÁT NHẠC -->
+<button class="music-fab" id="musicFab" onclick="toggleMusicPanel()" aria-label="Chọn nhạc">🎵</button>
+<div class="music-panel" id="musicPanel">
+<h3>🎵 Chọn nhạc</h3>
+<div class="song-list" id="musicList"></div>
+<div class="player-ctrl">
+<button onclick="prevSong()" aria-label="Bài trước">⏮</button>
+<button onclick="togglePlay()" id="playBtn" aria-label="Phát/Tạm dừng">▶</button>
+<button onclick="nextSong()" aria-label="Bài sau">⏭</button>
+<input type="range" id="vol" min="0" max="1" step="0.05" value="0.7" oninput="setVolume(this.value)" aria-label="Âm lượng">
+</div>
+<div class="now" id="nowPlaying"></div>
+</div>
+
+<!-- ĐĂNG NHẬP ADMIN -->
+<div class="modal" id="adminLoginModal">
+<div class="panel" style="max-width:390px">
+<button class="close" onclick="closeModal('adminLoginModal')">×</button>
+<h2>🔐 Đăng nhập quản trị</h2>
+<label for="adminUser">Email quản trị viên</label>
+<input id="adminUser" type="text" placeholder="Nhập email Firebase" autocomplete="username">
+<label for="adminPass">Mật khẩu quản trị</label>
+<input id="adminPass" type="password" placeholder="Mật khẩu">
+<div class="form-actions"><button class="primary" onclick="adminLogin()">Đăng nhập</button></div>
+<div class="status" id="adminLoginStatus"></div>
+</div>
+</div>
+
+<!-- BẢNG QUẢN TRỊ -->
+<div class="modal" id="adminModal">
+<div class="panel">
+<button class="close" onclick="closeAdmin()">×</button>
+<h2>🪐 Quản trị Galaxy Memories</h2>
+<div class="form-actions"><button onclick="logoutAdmin()">🚪 Đăng xuất quản trị</button></div>
+<p style="font-size:13px;color:#c7c6d4;line-height:1.6">Chỉnh sửa lời nhắn chung, thêm tên, ảnh và lời nhắn cho từng học sinh. Dữ liệu được đồng bộ trực tuyến qua Firebase.</p>
+<div class="admin-list" style="border-top:0;padding-top:0;margin-top:18px">
+<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:4px">💌 Lời nhắn chung (lá thư gửi cả lớp)</h3>
+<label for="letterTitleInput">Tiêu đề thư</label>
+<input id="letterTitleInput" type="text">
+<label for="letterBodyInput">Nội dung thư (xuống dòng để tách đoạn)</label>
+<textarea id="letterBodyInput" style="min-height:190px"></textarea>
+<label for="letterSignInput">Dòng ký tên / kết thư (in đậm)</label>
+<input id="letterSignInput" type="text">
+<div class="form-actions">
+<button class="primary" onclick="saveLetter()">💾 Lưu lời nhắn chung</button>
+<button onclick="resetLetter()">↺ Khôi phục mặc định</button>
+</div>
+<div class="status" id="letterStatus"></div>
+</div>
+<div class="admin-list">
+<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:4px">🎵 Nhạc cho khách chọn</h3>
+<label for="songTitle">Tên bài hát (có thể để trống)</label>
+<input id="songTitle" type="text" placeholder="Ví dụ: Bài hát của lớp">
+<label for="songFile">File nhạc (MP3, M4A, WAV, OGG — tối đa 20 MB)</label>
+<input id="songFile" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac,.flac,.opus,.wma">
+<div class="form-actions"><button class="primary" onclick="uploadSong()">＋ Tải nhạc lên</button></div>
+<div class="status" id="songStatus"></div>
+<div id="adminSongList"></div>
+</div>
+<div class="admin-list">
+<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:4px">🪐 Thêm học sinh</h3>
+<label for="studentName">Họ và tên học sinh</label>
+<input id="studentName" type="text" placeholder="Ví dụ: Nguyễn Văn A">
+<label for="studentWish">Lời chúc / lời nhắn</label>
+<textarea id="studentWish" placeholder="Viết lời chúc dành cho bạn ấy..."></textarea>
+<label for="studentImage">Ảnh học sinh</label>
+<input id="studentImage" type="file" accept="image/*">
+<div class="form-actions">
+<button class="primary" onclick="addStudent()">＋ Thêm học sinh</button>
+<button onclick="clearForm()">Xóa nội dung nhập</button>
+</div>
+<div class="status" id="adminStatus"></div>
+</div>
+<div class="admin-list">
+<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:8px">Danh sách hiện có</h3>
+<div id="adminStudentList"></div>
+</div>
+<p class="small">Học sinh, lời nhắn và danh sách nhạc được đồng bộ qua Firebase. File nhạc được lưu trong Firebase Storage.</p>
+</div>
+</div>
+
+<!-- LỜI NHẮN CHUNG -->
+<div class="modal" id="letterModal">
+<div class="letter">
+<button class="close" onclick="closeLetter()">×</button>
+<h2 id="letterTitle">Gửi tập thể 10A6,</h2>
+<p id="letterBody"></p>
+<p id="letterSign" style="margin-top:14px"><strong></strong></p>
+</div>
+</div>
+
+<!-- LỜI NHẮN RIÊNG -->
+<div class="modal" id="studentModal">
+<div class="letter">
+<button class="close" onclick="closeModal('studentModal')">×</button>
+<h2 id="studentModalName">Gửi bạn,</h2>
+<p id="studentModalWish"></p>
+</div>
+</div>
+
+<script>
+// BẦU TRỜI SAO
+const sky=document.getElementById('sky');
+for(let i=0;i<160;i++){
+const s=document.createElement('i');s.className='star';
+s.style.left=Math.random()*100+'%';s.style.top=Math.random()*100+'%';
+const z=Math.random()*2+1;s.style.width=z+'px';s.style.height=z+'px';
+s.style.animationDelay=Math.random()*4+'s';sky.appendChild(s);
+}
+setInterval(()=>{
+const s=document.createElement('div');s.className='shooting';
+s.style.left=(30+Math.random()*80)+'%';s.style.top=Math.random()*65+'%';
+document.body.appendChild(s);setTimeout(()=>s.remove(),1800);
+},3200);
+
+// KẾT NỐI FIREBASE
+const firebaseConfig = {
+  apiKey: "AIzaSyDq2V9UbaT1XK0HabIR4zcxh6N_wjKSk3s",
+  authDomain: "galaxy-memories-10a6-91626.firebaseapp.com",
+  projectId: "galaxy-memories-10a6-91626",
+  storageBucket: "galaxy-memories-10a6-91626.firebasestorage.app",
+  messagingSenderId: "718331576098",
+  appId: "1:718331576098:web:38609f42da31b1790c6f7b"
+};
+// Khởi tạo Firebase an toàn: nếu CDN/kết nối Firebase lỗi, cổng khách vẫn hoạt động.
+let auth = null, db = null, storage = null, studentsRef = null, letterRef = null, songsRef = null;
+let firebaseInitError = null;
+try {
+  if (!window.firebase || !firebase.initializeApp) throw new Error('Không tải được Firebase SDK.');
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+  db = firebase.firestore();
+  storage = firebase.storage();
+  studentsRef = db.collection('students');
+  letterRef = db.collection('site_content').doc('letter');
+  songsRef = db.collection('songs');
+} catch (e) {
+  firebaseInitError = e;
+  console.error('Firebase initialization failed:', e);
+}
+let firebaseReady = false;
+let studentsCache = [];
+let letterCache = null;
+
+const VISITOR_PASSWORD="10A6";
+
+// SO SÁNH KHÔNG PHÂN BIỆT HOA THƯỜNG
+function sameText(a,b){return String(a).trim().toLowerCase()===String(b).trim().toLowerCase()}
+
+// MẬT KHẨU TRUY CẬP
+function showSession(role){
+ const bar=document.getElementById('sessionBar');bar.classList.add('show');
+ document.getElementById('sessionLabel').textContent=role==='admin'?'Đang đăng nhập: Quản trị viên':'Đang truy cập: Thành viên';
+ document.getElementById('adminLogoutTop').style.display=role==='admin'?'inline-block':'none';
+}
+function unlockSite(){
+const value=document.getElementById('visitorPassword').value;
+if(sameText(value,VISITOR_PASSWORD)){
+document.getElementById('accessGate').style.display='none';
+try{sessionStorage.setItem('galaxyUnlocked','yes');sessionStorage.setItem('galaxyRole','member')}catch(e){}
+showSession('member');
+}else{
+document.getElementById('gateStatus').textContent='Mật khẩu chưa đúng. Vui lòng thử lại.';
+}
+}
+document.getElementById('visitorPassword').addEventListener('keydown',e=>{if(e.key==='Enter')unlockSite()});
+try{if(sessionStorage.getItem('galaxyUnlocked')==='yes'){document.getElementById('accessGate').style.display='none';showSession(sessionStorage.getItem('galaxyRole')==='admin'?'admin':'member')}}catch(e){}
+
+// ADMIN
+function showAdminLogin(){document.getElementById('adminLoginModal').classList.add('show')}
+async function adminLogin(){
+if(!auth){document.getElementById('adminLoginStatus').textContent='Không kết nối được Firebase. Hãy kiểm tra mạng hoặc tải lại trang.';return;}
+const email=document.getElementById('adminUser').value.trim();
+const password=document.getElementById('adminPass').value;
+const status=document.getElementById('adminLoginStatus');
+status.textContent='Đang đăng nhập...';
+try{
+await auth.signInWithEmailAndPassword(email,password);
+closeModal('adminLoginModal');
+document.getElementById('adminPass').value='';
+status.textContent='';
+document.getElementById('accessGate').style.display='none';
+try{sessionStorage.setItem('galaxyUnlocked','yes');sessionStorage.setItem('galaxyRole','admin')}catch(e){}
+showSession('admin');
+document.getElementById('adminModal').classList.add('show');
+fillLetterForm();renderAdminList();
+}catch(error){
+status.textContent='Đăng nhập không thành công. Hãy kiểm tra email, mật khẩu và kết nối mạng.';
+}
+}
+function closeAdmin(){closeModal('adminModal')}
+async function logoutMember(){
+ try{sessionStorage.removeItem('galaxyUnlocked');sessionStorage.removeItem('galaxyRole')}catch(e){}
+ document.getElementById('sessionBar').classList.remove('show');document.getElementById('accessGate').style.display='flex';
+ document.getElementById('visitorPassword').value='';document.getElementById('gateStatus').textContent='';
+}
+async function logoutAdmin(){
+ closeModal('adminModal');closeModal('adminLoginModal');
+ try{if(auth && auth.currentUser) await auth.signOut();}catch(e){console.error('Firebase sign out:',e)}
+ try{sessionStorage.removeItem('galaxyUnlocked');sessionStorage.removeItem('galaxyRole')}catch(e){}
+ document.getElementById('sessionBar').classList.remove('show');document.getElementById('accessGate').style.display='flex';
+ document.getElementById('visitorPassword').value='';document.getElementById('gateStatus').textContent='Bạn đã đăng xuất quản trị.';
+}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+function closeLetter(){
+closeModal('letterModal');
+document.getElementById('envelope').classList.remove('open');
+}
+
+
+// LỜI NHẮN CHUNG — ĐỒNG BỘ FIRESTORE
+const LETTER_KEY='galaxy_10a6_letter_v1';
+const DEFAULT_LETTER={
+title:'Gửi tập thể 10A6,',
+body:'Tuổi học trò là một hành trình thật đặc biệt. Cảm ơn vì chúng ta đã cùng nhau tạo nên những khoảnh khắc đáng nhớ, những tiếng cười và cả những kỷ niệm không thể thay thế.\nMong mỗi thành viên của 10A6 luôn tự tin theo đuổi ước mơ, giữ gìn tình bạn đẹp và có thật nhiều niềm vui trên chặng đường phía trước.\nDù sau này mỗi người có một hướng đi riêng, hy vọng chúng ta vẫn sẽ nhớ về nhau bằng những điều thật đẹp.',
+sign:'10A6 — mỗi người một vì sao, cùng tạo nên một bầu trời. ✨'
+};
+let memoryLetter=null;
+function getLetter(){return letterCache||memoryLetter||DEFAULT_LETTER}
+function renderLetter(){
+const l=getLetter();
+document.getElementById('letterTitle').textContent=l.title;
+document.getElementById('letterBody').textContent=l.body;
+document.getElementById('letterSign').firstChild.textContent=l.sign;
+}
+function fillLetterForm(){
+const l=getLetter();
+document.getElementById('letterTitleInput').value=l.title;
+document.getElementById('letterBodyInput').value=l.body;
+document.getElementById('letterSignInput').value=l.sign;
+}
+async function saveLetter(){
+const data={
+title:document.getElementById('letterTitleInput').value.trim()||DEFAULT_LETTER.title,
+body:document.getElementById('letterBodyInput').value.trim()||DEFAULT_LETTER.body,
+sign:document.getElementById('letterSignInput').value.trim()
+};
+const st=document.getElementById('letterStatus');
+try{await letterRef.set(data);letterCache=data;memoryLetter=data;st.textContent='Đã lưu và đồng bộ lời nhắn chung!';renderLetter();}
+catch(e){st.textContent='Không thể lưu lên Firebase. Hãy kiểm tra đăng nhập quản trị và Rules.';}
+}
+async function resetLetter(){
+const st=document.getElementById('letterStatus');
+try{await letterRef.set(DEFAULT_LETTER);letterCache=DEFAULT_LETTER;memoryLetter=null;fillLetterForm();renderLetter();st.textContent='Đã khôi phục lời nhắn mặc định trên tất cả thiết bị.';}
+catch(e){st.textContent='Không thể khôi phục. Hãy kiểm tra đăng nhập và kết nối.';}
+}
+
+// DANH SÁCH HỌC SINH — ĐỒNG BỘ FIRESTORE
+const STORAGE_KEY='galaxy_10a6_students_v1';
+function getStudents(){return studentsCache}
+async function saveStudents(data){
+const batch=db.batch();
+const snap=await studentsRef.get();
+snap.forEach(d=>{if(!data.some(x=>x.id===d.id))batch.delete(d.ref)});
+data.forEach(item=>{const ref=studentsRef.doc(String(item.id));const payload={name:item.name,wish:item.wish,image:item.image||'',updatedAt:firebase.firestore.FieldValue.serverTimestamp()};batch.set(ref,payload)});
+await batch.commit();
+}
+async function addStudent(){
+const name=document.getElementById('studentName').value.trim();
+const wish=document.getElementById('studentWish').value.trim();
+const file=document.getElementById('studentImage').files[0];
+const status=document.getElementById('adminStatus');
+if(!name){status.textContent='Bạn hãy nhập họ tên học sinh.';return}
+const finish=async(imageData)=>{
+try{
+if(imageData && imageData.length>700000){status.textContent='Ảnh sau khi nén vẫn còn lớn. Hãy chọn ảnh có dung lượng nhỏ hơn.';return}
+const id=Date.now().toString();
+await studentsRef.doc(id).set({name,wish:wish||'Chúc bạn luôn vui vẻ, tự tin và gặp nhiều điều tốt đẹp! ✨',image:imageData||'',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+clearForm();status.textContent='Đã thêm học sinh và đồng bộ thành công!';
+}catch(err){status.textContent='Không thể lưu. Kiểm tra kết nối, quyền Firestore và thử ảnh nhỏ hơn.';}
+};
+if(file){
+status.textContent='Đang xử lý và đồng bộ ảnh...';
+const reader=new FileReader();reader.onerror=()=>{status.textContent='Không đọc được ảnh.'};
+reader.onload=()=>{const im=new Image();im.onload=()=>{const max=500,r=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*r);c.height=Math.round(im.height*r);c.getContext('2d').drawImage(im,0,0,c.width,c.height);finish(c.toDataURL('image/jpeg',0.72));};im.onerror=()=>{status.textContent='Tệp này không phải ảnh hợp lệ.'};im.src=reader.result;};reader.readAsDataURL(file);
+}else finish('');
+}
+function clearForm(){document.getElementById('studentName').value='';document.getElementById('studentWish').value='';document.getElementById('studentImage').value='';}
+async function deleteStudent(id){
+try{await studentsRef.doc(String(id)).delete();document.getElementById('adminStatus').textContent='Đã xóa học sinh trên hệ thống.';}
+catch(e){document.getElementById('adminStatus').textContent='Không thể xóa. Hãy kiểm tra quyền quản trị.';}
+}
+function renderAdminList(){
+const box=document.getElementById('adminStudentList'),students=getStudents();box.innerHTML='';
+if(!students.length){box.innerHTML='<p style="color:#bfc1d0;font-size:13px">Chưa có học sinh nào. Hãy thêm thành viên đầu tiên nhé!</p>';return}
+students.forEach(s=>{
+const row=document.createElement('div');row.className='admin-row';const img=document.createElement('img');img.alt='Ảnh '+s.name;if(s.image)img.src=s.image;
+const span=document.createElement('span');span.textContent=s.name;const del=document.createElement('button');del.textContent='Xóa';let armed=false,timer;
+del.onclick=()=>{if(armed){clearTimeout(timer);deleteStudent(s.id);return}armed=true;del.textContent='Chắc chắn?';del.classList.add('primary');timer=setTimeout(()=>{armed=false;del.textContent='Xóa';del.classList.remove('primary')},3000)};
+row.append(img,span,del);box.appendChild(row);
+});
+}
+function renderStudents(){
+const grid=document.getElementById('studentGrid'),students=getStudents();grid.innerHTML='';
+if(!students.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">🌟 Những vì sao của lớp 10A6 sẽ xuất hiện tại đây.<br>Quản trị viên hãy đăng nhập để thêm tên, hình ảnh và lời nhắn cho các thành viên nhé!</div>';return;}
+students.forEach(s=>{
+const card=document.createElement('article');card.className='student-card';card.tabIndex=0;
+if(s.image){const img=document.createElement('img');img.className='student-photo';img.alt='Ảnh '+s.name;img.src=s.image;card.appendChild(img);}else{const ph=document.createElement('div');ph.className='student-photo';ph.textContent='🌟';card.appendChild(ph);}
+const name=document.createElement('h3');name.className='student-name';name.textContent=s.name;const wish=document.createElement('p');wish.className='student-wish';wish.textContent=s.wish;card.append(name,wish);
+card.addEventListener('click',()=>showStudent(s));card.addEventListener('keydown',e=>{if(e.key==='Enter')showStudent(s)});grid.appendChild(card);
+});
+}
+function startFirebaseSync(){
+if(!db || !studentsRef || !letterRef){console.error('Firebase unavailable; sync skipped.');return;}
+// Lắng nghe thay đổi trực tiếp để các thiết bị tự cập nhật.
+studentsRef.orderBy('name').onSnapshot(async snap=>{
+ studentsCache=snap.docs.map(d=>({id:d.id,...d.data()}));renderStudents();renderAdminList();
+ if(!firebaseReady){firebaseReady=true;if(snap.empty){let old=[];try{old=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch(e){}if(old.length){for(const item of old){const id=String(item.id||Date.now()+Math.random());await studentsRef.doc(id).set({name:item.name||'',wish:item.wish||'',image:item.image||''});}}}
+ }
+},err=>{document.getElementById('studentGrid').innerHTML='<div class="empty" style="grid-column:1/-1">Không tải được dữ liệu. Vui lòng thử tải lại trang.</div>';});
+letterRef.onSnapshot(async doc=>{
+ if(doc.exists){letterCache=doc.data();renderLetter();}
+ else if(!window._letterSeeded){window._letterSeeded=true;let old=null;try{old=JSON.parse(localStorage.getItem(LETTER_KEY)||'null')}catch(e){}await letterRef.set(old||DEFAULT_LETTER).catch(()=>{});}
+},()=>{renderLetter()});
+}
+
+function showStudent(s){
+document.getElementById('studentModalName').textContent='Gửi '+s.name+',';
+document.getElementById('studentModalWish').textContent=s.wish;
+document.getElementById('studentModal').classList.add('show');
+}
+function showLetter(){
+document.getElementById('envelope').classList.add('open');
+setTimeout(()=>{document.getElementById('letterModal').classList.add('show')},400);
+}
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{
+if(e.target===m){m.classList.remove('show');if(m.id==='letterModal')document.getElementById('envelope').classList.remove('open')}
+}));
+// NHẠC — FILE LƯU FIREBASE STORAGE, DANH SÁCH ĐỒNG BỘ FIRESTORE
+const MAX_SONG_BYTES=20*1024*1024;
+let songs=[],cur=-1;
+const urlCache=new Map();
+const audio=new Audio();audio.volume=0.7;
+function $(id){return document.getElementById(id)}
+const EXT_MIME={mp3:'audio/mpeg',m4a:'audio/mp4',wav:'audio/wav',ogg:'audio/ogg',aac:'audio/aac',flac:'audio/flac',opus:'audio/ogg',wma:'audio/x-ms-wma'};
+function audioType(f){if(f.type&&f.type.startsWith('audio/'))return f.type;const ext=(f.name.split('.').pop()||'').toLowerCase();return EXT_MIME[ext]||'';}
+function fmtSize(b){return (Number(b||0)/1024/1024).toFixed(1)+' MB'}
+async function loadSongs(){
+ if(!songsRef)return;
+ try{const snap=await songsRef.orderBy('createdAt','asc').get();songs=snap.docs.map(d=>({id:d.id,...d.data()}));if(cur>=songs.length)cur=-1;renderSongs();}
+ catch(e){$('songStatus').textContent='Không tải được danh sách nhạc. Hãy kiểm tra Firestore Rules.';console.error(e)}
+}
+function renderSongs(){
+ const box=$('musicList');box.innerHTML='';
+ if(!songs.length)box.innerHTML='<p style="font-size:13px;color:#bfc1d0">Chưa có bài nhạc nào.</p>';
+ songs.forEach((sg,i)=>{const b=document.createElement('button');b.className='song'+(i===cur?' active':'');b.textContent=(i===cur&&!audio.paused?'🔊 ':'🎶 ')+sg.title;b.onclick=()=>playSong(i);box.appendChild(b);});
+ const ab=$('adminSongList');ab.innerHTML='';
+ songs.forEach(sg=>{const row=document.createElement('div');row.className='admin-row';const span=document.createElement('span');span.textContent='🎶 '+sg.title+' ('+fmtSize(sg.size)+')';const del=document.createElement('button');del.textContent='Xóa';let armed=false,timer;del.onclick=()=>{if(armed){clearTimeout(timer);deleteSong(sg);return}armed=true;del.textContent='Chắc chắn?';del.classList.add('primary');timer=setTimeout(()=>{armed=false;del.textContent='Xóa';del.classList.remove('primary')},3000)};row.append(span,del);ab.appendChild(row);});
+ $('playBtn').textContent=audio.paused?'▶':'⏸';$('musicFab').classList.toggle('playing',!audio.paused);
+}
+async function playSong(i){const sg=songs[i];if(!sg)return;cur=i;try{audio.src=sg.url;await audio.play();$('nowPlaying').textContent='Đang phát: '+sg.title;}catch(e){$('nowPlaying').textContent='Không phát được bài này. Kiểm tra URL và quyền đọc Firebase Storage.'}renderSongs();}
+function togglePlay(){if(cur<0){if(songs.length)playSong(0);return}if(audio.paused)audio.play().catch(()=>{});else audio.pause();}
+function nextSong(){if(songs.length)playSong((cur+1)%songs.length)}
+function prevSong(){if(songs.length)playSong((cur-1+songs.length)%songs.length)}
+function setVolume(v){audio.volume=Number(v)}
+function toggleMusicPanel(){$('musicPanel').classList.toggle('show')}
+audio.addEventListener('play',renderSongs);audio.addEventListener('pause',renderSongs);audio.addEventListener('ended',nextSong);
+async function uploadSong(){
+ const st=$('songStatus'),file=$('songFile').files[0];
+ if(!auth||!auth.currentUser){st.textContent='Bạn cần đăng nhập quản trị viên trước khi tải nhạc.';return}
+ if(!file){st.textContent='Hãy chọn một file nhạc.';return}
+ const mime=audioType(file);if(!mime){st.textContent='Tệp này không phải file nhạc hợp lệ.';return}
+ if(file.size>MAX_SONG_BYTES){st.textContent='File quá lớn ('+fmtSize(file.size)+'). Hãy chọn file dưới 20 MB.';return}
+ const title=$('songTitle').value.trim()||file.name.replace(/\.[^.]+$/,'');const id=(crypto.randomUUID?crypto.randomUUID():Date.now().toString());const path='songs/'+id+'/'+file.name.replace(/[^\w.() -]/g,'_');
+ st.textContent='Đang tải file nhạc lên Firebase Storage...';
+ try{
+  const ref=storage.ref().child(path);await ref.put(file,{contentType:mime});const url=await ref.getDownloadURL();
+  await songsRef.doc(id).set({title,url,storagePath:path,type:mime,size:file.size,createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:auth.currentUser.uid});
+  $('songTitle').value='';$('songFile').value='';st.textContent='Đã tải và đồng bộ bài hát. Thành viên sẽ nhìn thấy sau vài giây.';await loadSongs();
+ }catch(e){st.textContent='Không thể tải nhạc. Kiểm tra Firebase Storage đã bật và Storage/Firestore Rules.';console.error(e)}
+}
+async function deleteSong(sg){
+ if(!auth||!auth.currentUser){$('songStatus').textContent='Chỉ quản trị viên mới được xóa nhạc.';return}
+ try{if(songs[cur]&&songs[cur].id===sg.id){audio.pause();audio.removeAttribute('src');$('nowPlaying').textContent='';cur=-1}if(sg.storagePath)await storage.ref().child(sg.storagePath).delete().catch(e=>console.warn('Storage delete:',e));await songsRef.doc(sg.id).delete();await loadSongs();$('songStatus').textContent='Đã xóa bài hát trên hệ thống.';}
+ catch(e){$('songStatus').textContent='Không thể xóa bài hát. Hãy kiểm tra quyền Firebase.';console.error(e)}
+}
+// Tự động cập nhật danh sách nhạc trên tất cả thiết bị đang mở trang.
+function startSongsSync(){if(!songsRef)return;songsRef.orderBy('createdAt','asc').onSnapshot(snap=>{const oldId=songs[cur]&&songs[cur].id;songs=snap.docs.map(d=>({id:d.id,...d.data()}));cur=songs.findIndex(x=>x.id===oldId);renderSongs();},e=>{console.error('Songs sync:',e);$('songStatus').textContent='Không thể đồng bộ nhạc. Kiểm tra Firestore Rules.';});}
+
+renderLetter();renderStudents();loadSongs();startFirebaseSync();startSongsSync();
+</script>
+</body>
+</html>
