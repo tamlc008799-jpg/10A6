@@ -7,6 +7,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 <style>
 :root{--gold:#f6d99a;--cream:#fff0d0;--navy:#071020;--purple:#9b79df}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -21,6 +22,8 @@ main{position:relative;z-index:2;max-width:1100px;margin:auto;padding:38px 18px 
 h1{font-family:Georgia,serif;font-size:clamp(29px,6vw,49px);font-weight:normal;color:#f7dfad;text-shadow:0 0 22px #c99d54;margin-bottom:12px}
 .subtitle{color:#d8d1c2;font-size:15px;line-height:1.8;max-width:650px;margin:0 auto 28px}
 .top-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:30px}
+#sessionBar{display:none;justify-content:center;gap:10px;align-items:center;flex-wrap:wrap;margin:-12px auto 24px;color:#d8d1c2;font-size:12px}
+#sessionBar.show{display:flex}
 button{border:1px solid #d9bd7d;background:linear-gradient(135deg,#263149,#111a2b);color:#f8e5b7;border-radius:28px;padding:11px 19px;font-size:14px;cursor:pointer;box-shadow:0 0 18px #d8ad5b25;transition:.2s}
 button:hover{transform:translateY(-2px);box-shadow:0 0 23px #e5c47b60}
 button.primary{background:linear-gradient(135deg,#7555bb,#33265e);border-color:#c5a8ff}
@@ -113,6 +116,7 @@ Vui lòng nhập mật khẩu để tiếp tục.</p>
 <div class="top-actions">
 <button onclick="showLetter()">💌 Lời nhắn chung</button>
 </div>
+<div id="sessionBar"><span id="sessionLabel">Đang truy cập</span><button onclick="logoutMember()">🚪 Đăng xuất</button><button id="adminLogoutTop" onclick="logoutAdmin()" style="display:none">🚪 Đăng xuất quản trị</button></div>
 <h2 class="section-title">✨ Những vì sao của 10A6</h2>
 <p class="section-note">Chạm vào từng thành viên để đọc lời nhắn dành riêng.</p>
 <section class="student-grid" id="studentGrid"></section>
@@ -159,6 +163,7 @@ Vui lòng nhập mật khẩu để tiếp tục.</p>
 <div class="panel">
 <button class="close" onclick="closeAdmin()">×</button>
 <h2>🪐 Quản trị Galaxy Memories</h2>
+<div class="form-actions"><button onclick="logoutAdmin()">🚪 Đăng xuất quản trị</button></div>
 <p style="font-size:13px;color:#c7c6d4;line-height:1.6">Chỉnh sửa lời nhắn chung, thêm tên, ảnh và lời nhắn cho từng học sinh. Dữ liệu được đồng bộ trực tuyến qua Firebase.</p>
 <div class="admin-list" style="border-top:0;padding-top:0;margin-top:18px">
 <h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:4px">💌 Lời nhắn chung (lá thư gửi cả lớp)</h3>
@@ -202,7 +207,7 @@ Vui lòng nhập mật khẩu để tiếp tục.</p>
 <h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:8px">Danh sách hiện có</h3>
 <div id="adminStudentList"></div>
 </div>
-<p class="small">Danh sách học sinh và lời nhắn chung được đồng bộ qua Firebase. Nhạc tải lên vẫn chỉ lưu trên thiết bị hiện tại; muốn đồng bộ nhạc cần lưu file nhạc ở dịch vụ lưu trữ trực tuyến riêng.</p>
+<p class="small">Học sinh, lời nhắn và danh sách nhạc được đồng bộ qua Firebase. File nhạc được lưu trong Firebase Storage.</p>
 </div>
 </div>
 
@@ -250,15 +255,17 @@ const firebaseConfig = {
   appId: "1:718331576098:web:38609f42da31b1790c6f7b"
 };
 // Khởi tạo Firebase an toàn: nếu CDN/kết nối Firebase lỗi, cổng khách vẫn hoạt động.
-let auth = null, db = null, studentsRef = null, letterRef = null;
+let auth = null, db = null, storage = null, studentsRef = null, letterRef = null, songsRef = null;
 let firebaseInitError = null;
 try {
   if (!window.firebase || !firebase.initializeApp) throw new Error('Không tải được Firebase SDK.');
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   auth = firebase.auth();
   db = firebase.firestore();
+  storage = firebase.storage();
   studentsRef = db.collection('students');
   letterRef = db.collection('site_content').doc('letter');
+  songsRef = db.collection('songs');
 } catch (e) {
   firebaseInitError = e;
   console.error('Firebase initialization failed:', e);
@@ -273,17 +280,23 @@ const VISITOR_PASSWORD="10A6";
 function sameText(a,b){return String(a).trim().toLowerCase()===String(b).trim().toLowerCase()}
 
 // MẬT KHẨU TRUY CẬP
+function showSession(role){
+ const bar=document.getElementById('sessionBar');bar.classList.add('show');
+ document.getElementById('sessionLabel').textContent=role==='admin'?'Đang đăng nhập: Quản trị viên':'Đang truy cập: Thành viên';
+ document.getElementById('adminLogoutTop').style.display=role==='admin'?'inline-block':'none';
+}
 function unlockSite(){
 const value=document.getElementById('visitorPassword').value;
 if(sameText(value,VISITOR_PASSWORD)){
 document.getElementById('accessGate').style.display='none';
-try{sessionStorage.setItem('galaxyUnlocked','yes')}catch(e){}
+try{sessionStorage.setItem('galaxyUnlocked','yes');sessionStorage.setItem('galaxyRole','member')}catch(e){}
+showSession('member');
 }else{
 document.getElementById('gateStatus').textContent='Mật khẩu chưa đúng. Vui lòng thử lại.';
 }
 }
 document.getElementById('visitorPassword').addEventListener('keydown',e=>{if(e.key==='Enter')unlockSite()});
-try{if(sessionStorage.getItem('galaxyUnlocked')==='yes')document.getElementById('accessGate').style.display='none'}catch(e){}
+try{if(sessionStorage.getItem('galaxyUnlocked')==='yes'){document.getElementById('accessGate').style.display='none';showSession(sessionStorage.getItem('galaxyRole')==='admin'?'admin':'member')}}catch(e){}
 
 // ADMIN
 function showAdminLogin(){document.getElementById('adminLoginModal').classList.add('show')}
@@ -299,6 +312,8 @@ closeModal('adminLoginModal');
 document.getElementById('adminPass').value='';
 status.textContent='';
 document.getElementById('accessGate').style.display='none';
+try{sessionStorage.setItem('galaxyUnlocked','yes');sessionStorage.setItem('galaxyRole','admin')}catch(e){}
+showSession('admin');
 document.getElementById('adminModal').classList.add('show');
 fillLetterForm();renderAdminList();
 }catch(error){
@@ -306,6 +321,18 @@ status.textContent='Đăng nhập không thành công. Hãy kiểm tra email, m�
 }
 }
 function closeAdmin(){closeModal('adminModal')}
+async function logoutMember(){
+ try{sessionStorage.removeItem('galaxyUnlocked');sessionStorage.removeItem('galaxyRole')}catch(e){}
+ document.getElementById('sessionBar').classList.remove('show');document.getElementById('accessGate').style.display='flex';
+ document.getElementById('visitorPassword').value='';document.getElementById('gateStatus').textContent='';
+}
+async function logoutAdmin(){
+ closeModal('adminModal');closeModal('adminLoginModal');
+ try{if(auth && auth.currentUser) await auth.signOut();}catch(e){console.error('Firebase sign out:',e)}
+ try{sessionStorage.removeItem('galaxyUnlocked');sessionStorage.removeItem('galaxyRole')}catch(e){}
+ document.getElementById('sessionBar').classList.remove('show');document.getElementById('accessGate').style.display='flex';
+ document.getElementById('visitorPassword').value='';document.getElementById('gateStatus').textContent='Bạn đã đăng xuất quản trị.';
+}
 function closeModal(id){document.getElementById(id).classList.remove('show')}
 function closeLetter(){
 closeModal('letterModal');
@@ -431,111 +458,58 @@ setTimeout(()=>{document.getElementById('letterModal').classList.add('show')},40
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{
 if(e.target===m){m.classList.remove('show');if(m.id==='letterModal')document.getElementById('envelope').classList.remove('open')}
 }));
-// NHẠC (lưu trong IndexedDB của trình duyệt)
+// NHẠC — FILE LƯU FIREBASE STORAGE, DANH SÁCH ĐỒNG BỘ FIRESTORE
 const MAX_SONG_BYTES=20*1024*1024;
-let songs=[],cur=-1,memSongs=[];
+let songs=[],cur=-1;
 const urlCache=new Map();
 const audio=new Audio();audio.volume=0.7;
 function $(id){return document.getElementById(id)}
 const EXT_MIME={mp3:'audio/mpeg',m4a:'audio/mp4',wav:'audio/wav',ogg:'audio/ogg',aac:'audio/aac',flac:'audio/flac',opus:'audio/ogg',wma:'audio/x-ms-wma'};
-function audioType(f){
-if(f.type&&f.type.startsWith('audio/'))return f.type;
-const ext=(f.name.split('.').pop()||'').toLowerCase();
-return EXT_MIME[ext]||'';
-}
-function fmtSize(b){return (b/1024/1024).toFixed(1)+' MB'}
-function idb(){return new Promise((res,rej)=>{
-if(!window.indexedDB){rej(new Error('noidb'));return}
-const r=indexedDB.open('galaxy_10a6_music',1);
-r.onupgradeneeded=()=>r.result.createObjectStore('songs',{keyPath:'id'});
-r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);
-})}
-async function songsAll(){
-try{const d=await idb();return await new Promise((res,rej)=>{const q=d.transaction('songs').objectStore('songs').getAll();q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})}
-catch(e){return memSongs.slice()}
-}
-async function songPut(rec){
-try{const d=await idb();await new Promise((res,rej)=>{const t=d.transaction('songs','readwrite');t.objectStore('songs').put(rec);t.oncomplete=res;t.onerror=()=>rej(t.error)})}
-catch(e){memSongs.push(rec);window.songTemp=true}
-}
-async function songDel(id){
-memSongs=memSongs.filter(x=>x.id!==id);
-try{const d=await idb();await new Promise((res,rej)=>{const t=d.transaction('songs','readwrite');t.objectStore('songs').delete(id);t.oncomplete=res;t.onerror=()=>rej(t.error)})}catch(e){}
-}
+function audioType(f){if(f.type&&f.type.startsWith('audio/'))return f.type;const ext=(f.name.split('.').pop()||'').toLowerCase();return EXT_MIME[ext]||'';}
+function fmtSize(b){return (Number(b||0)/1024/1024).toFixed(1)+' MB'}
 async function loadSongs(){
-const curId=songs[cur]&&songs[cur].id;
-songs=(await songsAll()).sort((a,b)=>a.createdAt-b.createdAt);
-cur=songs.findIndex(x=>x.id===curId);
-renderSongs();
+ if(!songsRef)return;
+ try{const snap=await songsRef.orderBy('createdAt','asc').get();songs=snap.docs.map(d=>({id:d.id,...d.data()}));if(cur>=songs.length)cur=-1;renderSongs();}
+ catch(e){$('songStatus').textContent='Không tải được danh sách nhạc. Hãy kiểm tra Firestore Rules.';console.error(e)}
 }
 function renderSongs(){
-const box=$('musicList');box.innerHTML='';
-if(!songs.length)box.innerHTML='<p style="font-size:13px;color:#bfc1d0">Chưa có bài nhạc nào.</p>';
-songs.forEach((sg,i)=>{
-const b=document.createElement('button');b.className='song'+(i===cur?' active':'');
-b.textContent=(i===cur&&!audio.paused?'🔊 ':'🎶 ')+sg.title;
-b.onclick=()=>playSong(i);box.appendChild(b);
-});
-const ab=$('adminSongList');ab.innerHTML='';
-songs.forEach(sg=>{
-const row=document.createElement('div');row.className='admin-row';
-const span=document.createElement('span');span.textContent='🎶 '+sg.title+' ('+fmtSize(sg.size||0)+')';
-const del=document.createElement('button');del.textContent='Xóa';let armed=false,timer;
-del.onclick=()=>{
-if(armed){clearTimeout(timer);deleteSong(sg);return}
-armed=true;del.textContent='Chắc chắn?';del.classList.add('primary');
-timer=setTimeout(()=>{armed=false;del.textContent='Xóa';del.classList.remove('primary')},3000);
-};
-row.append(span,del);ab.appendChild(row);
-});
-$('playBtn').textContent=audio.paused?'▶':'⏸';
-$('musicFab').classList.toggle('playing',!audio.paused);
+ const box=$('musicList');box.innerHTML='';
+ if(!songs.length)box.innerHTML='<p style="font-size:13px;color:#bfc1d0">Chưa có bài nhạc nào.</p>';
+ songs.forEach((sg,i)=>{const b=document.createElement('button');b.className='song'+(i===cur?' active':'');b.textContent=(i===cur&&!audio.paused?'🔊 ':'🎶 ')+sg.title;b.onclick=()=>playSong(i);box.appendChild(b);});
+ const ab=$('adminSongList');ab.innerHTML='';
+ songs.forEach(sg=>{const row=document.createElement('div');row.className='admin-row';const span=document.createElement('span');span.textContent='🎶 '+sg.title+' ('+fmtSize(sg.size)+')';const del=document.createElement('button');del.textContent='Xóa';let armed=false,timer;del.onclick=()=>{if(armed){clearTimeout(timer);deleteSong(sg);return}armed=true;del.textContent='Chắc chắn?';del.classList.add('primary');timer=setTimeout(()=>{armed=false;del.textContent='Xóa';del.classList.remove('primary')},3000)};row.append(span,del);ab.appendChild(row);});
+ $('playBtn').textContent=audio.paused?'▶':'⏸';$('musicFab').classList.toggle('playing',!audio.paused);
 }
-async function playSong(i){
-const sg=songs[i];if(!sg)return;
-cur=i;
-try{
-let url=urlCache.get(sg.id);
-if(!url){url=URL.createObjectURL(sg.blob);urlCache.set(sg.id,url)}
-audio.src=url;await audio.play();
-$('nowPlaying').textContent='Đang phát: '+sg.title;
-}catch(e){$('nowPlaying').textContent='Không phát được bài này.'}
-renderSongs();
-}
-function togglePlay(){
-if(cur<0){if(songs.length)playSong(0);return}
-if(audio.paused)audio.play().catch(()=>{});else audio.pause();
-}
+async function playSong(i){const sg=songs[i];if(!sg)return;cur=i;try{audio.src=sg.url;await audio.play();$('nowPlaying').textContent='Đang phát: '+sg.title;}catch(e){$('nowPlaying').textContent='Không phát được bài này. Kiểm tra URL và quyền đọc Firebase Storage.'}renderSongs();}
+function togglePlay(){if(cur<0){if(songs.length)playSong(0);return}if(audio.paused)audio.play().catch(()=>{});else audio.pause();}
 function nextSong(){if(songs.length)playSong((cur+1)%songs.length)}
 function prevSong(){if(songs.length)playSong((cur-1+songs.length)%songs.length)}
 function setVolume(v){audio.volume=Number(v)}
 function toggleMusicPanel(){$('musicPanel').classList.toggle('show')}
-audio.addEventListener('play',renderSongs);
-audio.addEventListener('pause',renderSongs);
-audio.addEventListener('ended',nextSong);
+audio.addEventListener('play',renderSongs);audio.addEventListener('pause',renderSongs);audio.addEventListener('ended',nextSong);
 async function uploadSong(){
-const st=$('songStatus'),file=$('songFile').files[0];
-if(!file){st.textContent='Hãy chọn một file nhạc.';return}
-const mime=audioType(file);
-if(!mime){st.textContent='Tệp này không phải file nhạc (hãy dùng MP3, M4A, WAV, OGG).';return}
-if(file.size>MAX_SONG_BYTES){st.textContent='File quá lớn ('+fmtSize(file.size)+'). Hãy chọn file dưới 20 MB.';return}
-const title=$('songTitle').value.trim()||file.name.replace(/\.[^.]+$/,'');
-try{
-await songPut({id:Date.now().toString(),title,type:mime,size:file.size,blob:new Blob([file],{type:mime}),createdAt:Date.now()});
-$('songTitle').value='';$('songFile').value='';
-st.textContent=window.songTemp?'Đã thêm, nhưng trình duyệt này không cho lưu lâu dài nên nhạc chỉ giữ đến khi tải lại trang. Hãy mở file trực tiếp bằng Chrome/Edge/Safari.':'Đã thêm bài hát thành công!';
-await loadSongs();
-}catch(e){st.textContent='Không thể lưu bài hát: '+((e&&e.message)||'trình duyệt hết dung lượng hoặc chặn lưu trữ')+'.'}
+ const st=$('songStatus'),file=$('songFile').files[0];
+ if(!auth||!auth.currentUser){st.textContent='Bạn cần đăng nhập quản trị viên trước khi tải nhạc.';return}
+ if(!file){st.textContent='Hãy chọn một file nhạc.';return}
+ const mime=audioType(file);if(!mime){st.textContent='Tệp này không phải file nhạc hợp lệ.';return}
+ if(file.size>MAX_SONG_BYTES){st.textContent='File quá lớn ('+fmtSize(file.size)+'). Hãy chọn file dưới 20 MB.';return}
+ const title=$('songTitle').value.trim()||file.name.replace(/\.[^.]+$/,'');const id=(crypto.randomUUID?crypto.randomUUID():Date.now().toString());const path='songs/'+id+'/'+file.name.replace(/[^\w.() -]/g,'_');
+ st.textContent='Đang tải file nhạc lên Firebase Storage...';
+ try{
+  const ref=storage.ref().child(path);await ref.put(file,{contentType:mime});const url=await ref.getDownloadURL();
+  await songsRef.doc(id).set({title,url,storagePath:path,type:mime,size:file.size,createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:auth.currentUser.uid});
+  $('songTitle').value='';$('songFile').value='';st.textContent='Đã tải và đồng bộ bài hát. Thành viên sẽ nhìn thấy sau vài giây.';await loadSongs();
+ }catch(e){st.textContent='Không thể tải nhạc. Kiểm tra Firebase Storage đã bật và Storage/Firestore Rules.';console.error(e)}
 }
 async function deleteSong(sg){
-if(urlCache.has(sg.id)){
-if(songs[cur]&&songs[cur].id===sg.id){audio.pause();audio.removeAttribute('src');$('nowPlaying').textContent=''}
-URL.revokeObjectURL(urlCache.get(sg.id));urlCache.delete(sg.id);
+ if(!auth||!auth.currentUser){$('songStatus').textContent='Chỉ quản trị viên mới được xóa nhạc.';return}
+ try{if(songs[cur]&&songs[cur].id===sg.id){audio.pause();audio.removeAttribute('src');$('nowPlaying').textContent='';cur=-1}if(sg.storagePath)await storage.ref().child(sg.storagePath).delete().catch(e=>console.warn('Storage delete:',e));await songsRef.doc(sg.id).delete();await loadSongs();$('songStatus').textContent='Đã xóa bài hát trên hệ thống.';}
+ catch(e){$('songStatus').textContent='Không thể xóa bài hát. Hãy kiểm tra quyền Firebase.';console.error(e)}
 }
-await songDel(sg.id);await loadSongs();
-}
+// Tự động cập nhật danh sách nhạc trên tất cả thiết bị đang mở trang.
+function startSongsSync(){if(!songsRef)return;songsRef.orderBy('createdAt','asc').onSnapshot(snap=>{const oldId=songs[cur]&&songs[cur].id;songs=snap.docs.map(d=>({id:d.id,...d.data()}));cur=songs.findIndex(x=>x.id===oldId);renderSongs();},e=>{console.error('Songs sync:',e);$('songStatus').textContent='Không thể đồng bộ nhạc. Kiểm tra Firestore Rules.';});}
 
-renderLetter();renderStudents();loadSongs();startFirebaseSync();
+renderLetter();renderStudents();loadSongs();startFirebaseSync();startSongsSync();
 </script>
 </body>
 </html>
