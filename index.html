@@ -143,7 +143,7 @@ Vui lòng nhập mật khẩu để tiếp tục<br>(Mật khẩu là tên lớp
 <div class="top-actions">
 <button id="letterButtonLabel" onclick="showLetter()">💌 Lời nhắn chung</button>
 </div>
-<div id="sessionBar"><span id="sessionLabel">Đang truy cập</span><button onclick="logoutMember()">🚪 Đăng xuất</button><button id="adminLogoutTop" onclick="logoutAdmin()" style="display:none">🚪 Đăng xuất quản trị</button></div>
+<div id="sessionBar"><span id="sessionLabel">Đang truy cập</span><button onclick="logoutMember()">🚪 Đăng xuất</button><button id="adminOpenTop" onclick="openAdminPanel()" style="display:none">⚙️ Thay đổi giao diện</button><button id="adminLogoutTop" onclick="logoutAdmin()" style="display:none">🚪 Đăng xuất quản trị</button></div>
 <h2 class="section-title" id="starsTitle">✨ Những vì sao của 10A6</h2>
 <p class="section-note" id="starsNote">Chạm vào từng thành viên để đọc lời nhắn dành riêng.</p>
 <section class="student-grid" id="studentGrid"></section>
@@ -416,6 +416,7 @@ function showSession(role){
  const bar=document.getElementById('sessionBar');bar.classList.add('show');
  document.getElementById('sessionLabel').textContent=role==='admin'?'Đang đăng nhập: Quản trị viên':'Đang truy cập: Thành viên';
  document.getElementById('adminLogoutTop').style.display=role==='admin'?'inline-block':'none';
+ document.getElementById('adminOpenTop').style.display=role==='admin'?'inline-block':'none';
 }
 function unlockSite(){
 const value=document.getElementById('visitorPassword').value;
@@ -447,10 +448,18 @@ document.getElementById('accessGate').style.display='none';
 try{sessionStorage.setItem('galaxyUnlocked','yes');sessionStorage.setItem('galaxyRole','admin')}catch(e){}
 showSession('admin');
 document.getElementById('adminModal').classList.add('show');
-fillLetterForm();fillAppearanceForm();renderAdminList();startAdminMessagesSync();
+fillLetterForm();fillAppearanceForm();renderAdminList();
+if(!adminMsgStarted){adminMsgStarted=true;startAdminMessagesSync();}
 }catch(error){
 status.textContent='Đăng nhập không thành công. Hãy kiểm tra email, mật khẩu và kết nối mạng.';
 }
+}
+let adminMsgStarted=false;
+function openAdminPanel(){
+if(!auth||!auth.currentUser){showAdminLogin();return;}
+fillLetterForm();fillAppearanceForm();renderAdminList();
+if(!adminMsgStarted){adminMsgStarted=true;startAdminMessagesSync();}
+document.getElementById('adminModal').classList.add('show');
 }
 function closeAdmin(){closeModal('adminModal')}
 async function logoutMember(){
