@@ -40,15 +40,25 @@ button.primary{background:linear-gradient(135deg,#7555bb,#33265e);border-color:#
 .student-card-hint{font-size:11px;color:#c9b78f;letter-spacing:.3px;margin-top:8px}
 .empty{padding:35px 15px;border:1px dashed #bda46d77;border-radius:14px;color:#c6c4d2;line-height:1.8}
 .envelope-area{margin:50px auto 0}
-@keyframes shakeEnv{0%,100%{transform:rotate(0deg)}20%{transform:rotate(-4deg)}40%{transform:rotate(4deg)}60%{transform:rotate(-3deg)}80%{transform:rotate(3deg)}}
-.envelope{position:relative;width:190px;height:125px;margin:22px auto 15px;cursor:pointer;filter:drop-shadow(0 10px 20px #0009);transition:.3s;animation:shakeEnv 2.5s ease-in-out infinite}
-.envelope:hover{transform:translateY(-5px) scale(1.03);animation:none}
-.env-back{position:absolute;inset:0;background:#263b59;border:1px solid #8c795b;border-radius:4px}
-.env-front{position:absolute;inset:0;background:linear-gradient(145deg,#324c6d,#14243c);clip-path:polygon(0 0,50% 58%,100% 0,100% 100%,0 100%)}
-.env-flap{position:absolute;inset:0;background:#405a7b;clip-path:polygon(0 0,100% 0,50% 60%);transform-origin:top;transition:transform .8s;z-index:3}
-.seal{position:absolute;z-index:4;left:50%;top:58%;transform:translate(-50%,-50%);width:28px;height:28px;border-radius:50%;background:radial-gradient(circle,#f8e5b7,#a98a4f);color:#634b25;display:grid;place-items:center}
-.envelope.open .env-flap{transform:rotateX(180deg);z-index:0}
+@keyframes floatEnv{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes sealGlow{0%,100%{box-shadow:0 3px 8px #0008,0 0 0 0 #f6d99a00,inset 0 0 0 3px #c99a4d55,inset 0 -2px 4px #0004}50%{box-shadow:0 3px 8px #0008,0 0 16px 4px #f6d99a88,inset 0 0 0 3px #c99a4d55,inset 0 -2px 4px #0004}}
+.envelope{position:relative;width:min(270px,78vw);aspect-ratio:260/170;margin:44px auto 22px;cursor:pointer;perspective:900px;filter:drop-shadow(0 16px 20px #000a) drop-shadow(0 0 22px #f6d99a1f);transition:transform .35s,filter .35s;animation:floatEnv 4.5s ease-in-out infinite}
+.envelope::after{content:"";position:absolute;left:8%;right:8%;bottom:-22px;height:16px;background:radial-gradient(ellipse at center,#f6d99a40,transparent 70%);z-index:0;pointer-events:none}
+.envelope:hover{animation:none;transform:translateY(-6px) scale(1.04);filter:drop-shadow(0 20px 24px #000b) drop-shadow(0 0 30px #f6d99a55)}
 .envelope.open{animation:none}
+.env-back{position:absolute;inset:0;z-index:1;border-radius:5px;background:linear-gradient(160deg,#1e3252,#0d182c);border:1px solid #c9a76688;box-shadow:inset 0 0 22px #00000070}
+.env-paper{position:absolute;left:9%;right:9%;top:8%;height:88%;z-index:2;border-radius:4px;background:linear-gradient(160deg,#fffaf0,#efdfbf);box-shadow:0 -3px 12px #0005;padding:11px 14px;text-align:left;color:#7a6240;font-size:12px;font-style:italic;overflow:hidden;transition:transform .75s cubic-bezier(.3,1.25,.5,1) .15s}
+.env-paper i{display:block;height:1px;margin-top:11px;background:#b39a6e88}
+.env-paper i:nth-child(odd){width:86%}
+.env-front{position:absolute;inset:0;width:100%;height:100%;z-index:3;display:block;pointer-events:none}
+.env-flap{position:absolute;left:0;top:0;width:100%;height:57%;z-index:4;transform-origin:top;transition:transform .7s ease,z-index 0s linear .32s;pointer-events:none}
+.env-flap svg{width:100%;height:100%;display:block;transition:filter .7s}
+.envelope:hover .env-flap,.envelope.open .env-flap{transform:rotateX(180deg);z-index:1}
+.envelope:hover .env-flap svg,.envelope.open .env-flap svg{filter:brightness(.72)}
+.envelope:hover .env-paper,.envelope.open .env-paper{transform:translateY(-34%)}
+.seal{position:absolute;z-index:5;left:50%;top:56%;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 35% 28%,#ffeec8,#d6ab5c 46%,#8a6226);color:#7b2d3b;display:grid;place-items:center;font-size:17px;line-height:1;animation:sealGlow 2.8s ease-in-out infinite;transition:opacity .35s,transform .35s;pointer-events:none}
+.seal::after{content:"";position:absolute;inset:5px;border-radius:50%;border:1px dashed #7b5a2499}
+.envelope:hover .seal,.envelope.open .seal{opacity:0;transform:translate(-50%,-50%) scale(.5)}
 .hint{font-size:13px;color:#c9c0ac}
 .modal{position:fixed;inset:0;background:#020611e8;backdrop-filter:blur(8px);z-index:60;display:none;align-items:center;justify-content:center;padding:15px}
 .modal.show{display:flex}
@@ -86,6 +96,13 @@ input[type=file]{width:100%;color:#d7d1e2;font-size:13px}
 .gate-card button{margin-top:13px;width:100%}
 .gate-admin{margin-top:18px!important;background:transparent!important;border:0!important;box-shadow:none!important;color:#b9afd0!important;text-decoration:underline;padding:5px!important}
 .small{font-size:11px;color:#9298ad;line-height:1.5;margin-top:13px}
+.color-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:12px}
+.color-box{padding:12px;border:1px solid #c5a8ff44;border-radius:12px;background:#ffffff08}
+.color-box>b{display:block;font-size:13px;color:#f5dca7;margin-bottom:6px}
+.color-box label{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0 0}
+input[type=color]{width:56px;height:34px;padding:2px;border:1px solid #8e80a9;border-radius:8px;background:#090f20;cursor:pointer}
+.color-preview{position:relative;height:78px;margin-top:12px;border-radius:10px;border:1px solid #ffffff2a;overflow:hidden}
+.color-preview::after{content:"";position:absolute;left:50%;top:50%;width:46%;height:56%;transform:translate(-50%,-50%);border:1px solid #c4a66b99;border-radius:8px;background:#111a2d99}
 .music-fab{position:fixed;left:16px;bottom:16px;z-index:40;width:50px;height:50px;border-radius:50%;padding:0;font-size:22px;background:linear-gradient(135deg,#7555bb,#33265e);border-color:#c5a8ff}
 .music-fab.playing{animation:pulse 1.6s infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 12px #c5a8ff60}50%{box-shadow:0 0 26px #c5a8ffcc}}
@@ -137,10 +154,32 @@ Vui lòng nhập mật khẩu để tiếp tục<br>(Mật khẩu là tên lớp
 <h2 class="section-title" id="envelopeTitle">💌 Một lá thư gửi cả lớp</h2>
 <p class="section-note" id="envelopeNote">Một vài dòng nhỏ dành cho tất cả chúng ta.</p>
 <div class="envelope" id="envelope" onclick="showLetter()">
-<div class="env-back"></div><div class="env-front"></div><div class="env-flap"></div><div class="seal">✦</div>
+<div class="env-back"></div>
+<div class="env-paper"><span>Gửi cả lớp 10A6,</span><i></i><i></i><i></i><i></i></div>
+<svg class="env-front" viewBox="0 0 260 170" preserveAspectRatio="none" aria-hidden="true">
+<defs>
+<linearGradient id="envL" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f4a70"/><stop offset="1" stop-color="#1a2c49"/></linearGradient>
+<linearGradient id="envR" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b4467"/><stop offset="1" stop-color="#162540"/></linearGradient>
+<linearGradient id="envB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38557f"/><stop offset="1" stop-color="#101c33"/></linearGradient>
+<linearGradient id="envGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6d99a"/><stop offset=".5" stop-color="#b38d4e"/><stop offset="1" stop-color="#f6d99a"/></linearGradient>
+</defs>
+<path d="M0 0 L132 92 L0 170 Z" fill="url(#envL)"/>
+<path d="M260 0 L128 92 L260 170 Z" fill="url(#envR)"/>
+<path d="M0 170 L130 84 L260 170 Z" fill="url(#envB)"/>
+<path d="M0 170 L130 84 L260 170" fill="none" stroke="url(#envGold)" stroke-width="1.2" opacity=".6"/>
+</svg>
+<div class="env-flap"><svg viewBox="0 0 260 98" preserveAspectRatio="none" aria-hidden="true">
+<defs>
+<linearGradient id="envFlap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#456690"/><stop offset="1" stop-color="#27406a"/></linearGradient>
+<linearGradient id="envGold2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f6d99a"/><stop offset=".5" stop-color="#b38d4e"/><stop offset="1" stop-color="#f6d99a"/></linearGradient>
+</defs>
+<polygon points="0,0 260,0 130,97" fill="url(#envFlap)"/>
+<polyline points="0,0 130,97 260,0" fill="none" stroke="url(#envGold2)" stroke-width="1.4" opacity=".75"/>
+</svg></div>
+<div class="seal">♥</div>
 </div>
 <p class="hint" id="envelopeHint">Chạm vào phong thư để mở lời nhắn</p>
-<button onclick="openAdminMessage()" style="margin-top:20px">✉️ Gửi tâm thư cho Admin</button>
+<button onclick="openAdminMessage()" style="margin-top:20px">✉️ Gửi tâm thư cho thầy</button>
 </div>
 </main>
 
@@ -207,6 +246,25 @@ Vui lòng nhập mật khẩu để tiếp tục<br>(Mật khẩu là tên lớp
 <div class="status" id="appearanceStatus"></div>
 </div>
 <div class="admin-list">
+<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:4px">🌈 Màu nền màn hình đăng nhập</h3>
+<p style="font-size:13px;color:#c7c6d4;line-height:1.7;margin:8px 0">Tự do chọn màu nền cho 2 màn hình đăng nhập. Màu chuyển từ tâm ra ngoài rìa màn hình và tự đồng bộ đến mọi thiết bị.</p>
+<div class="color-grid">
+<div class="color-box"><b>🌌 Đăng nhập thành viên (nhập mật khẩu)</b>
+<label for="gateColor1">Màu ở giữa <input type="color" id="gateColor1" value="#20284a" oninput="previewLoginColors()"></label>
+<label for="gateColor2">Màu ở ngoài <input type="color" id="gateColor2" value="#02050d" oninput="previewLoginColors()"></label>
+<div class="color-preview" id="gatePreview"></div></div>
+<div class="color-box"><b>🔐 Đăng nhập quản trị viên</b>
+<label for="adminColor1">Màu ở giữa <input type="color" id="adminColor1" value="#0b1227" oninput="previewLoginColors()"></label>
+<label for="adminColor2">Màu ở ngoài <input type="color" id="adminColor2" value="#020611" oninput="previewLoginColors()"></label>
+<div class="color-preview" id="adminPreview"></div></div>
+</div>
+<div class="form-actions">
+<button class="primary" onclick="saveLoginColors()">💾 Lưu màu nền</button>
+<button onclick="resetLoginColors()">↺ Màu mặc định</button>
+</div>
+<div class="status" id="loginColorStatus"></div>
+</div>
+<div class="admin-list">
 <h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:4px">💌 Lời nhắn chung (lá thư gửi cả lớp)</h3>
 <label for="letterTitleInput">Tiêu đề thư</label>
 <input id="letterTitleInput" type="text">
@@ -244,7 +302,7 @@ Tải file MP3 lên thư mục <b>assets/music</b> trên GitHub trước. Sau đ
 <div class="status" id="groupPhotoStatus"></div><div id="adminGalleryList"></div>
 </div>
 <div class="admin-list">
-<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:4px">📬 Hộp thư tâm thư gửi Admin</h3>
+<h3 style="font:normal 18px Georgia,serif;color:#f5dca7;margin-bottom:4px">📬 Hộp thư tâm thư gửi thầy</h3>
 <p style="font-size:13px;color:#c7c6d4;line-height:1.7">Chỉ tài khoản Admin đã đăng nhập mới xem được những tâm thư này.</p>
 <div id="adminMessages"><p style="color:#bfc1d0;font-size:13px">Đăng nhập Admin để xem hộp thư.</p></div>
 </div>
@@ -274,10 +332,10 @@ Tải file MP3 lên thư mục <b>assets/music</b> trên GitHub trước. Sau đ
 <div class="modal" id="adminMessageModal">
 <div class="panel" style="max-width:560px">
 <button class="close" onclick="closeModal('adminMessageModal')">×</button>
-<h2>✉️ Tâm thư gửi Admin</h2>
-<p style="color:#c7c6d4;font-size:13px;line-height:1.6">Bạn có thể chia sẻ lời nhắn, góp ý hoặc điều muốn gửi riêng đến Admin. Nội dung này chỉ Admin xem được.</p>
+<h2>✉️ Tâm thư gửi thầy</h2>
+<p style="color:#c7c6d4;font-size:13px;line-height:1.6">Bạn có thể chia sẻ lời nhắn, góp ý hoặc điều muốn gửi riêng đến thầy. Nội dung này chỉ thầy xem được.</p>
 <label for="messageSender">Tên của bạn (không bắt buộc)</label><input id="messageSender" type="text" maxlength="60" placeholder="Tên hoặc biệt danh">
-<label for="messageContent">Nội dung tâm thư</label><textarea id="messageContent" maxlength="3000" style="min-height:150px" placeholder="Viết điều bạn muốn gửi đến Admin..."></textarea>
+<label for="messageContent">Nội dung tâm thư</label><textarea id="messageContent" maxlength="3000" style="min-height:150px" placeholder="Viết điều bạn muốn gửi đến thầy..."></textarea>
 <div class="form-actions"><button class="primary" onclick="sendAdminMessage()">💌 Gửi tâm thư</button></div>
 <div class="status" id="adminMessageStatus"></div>
 </div>
@@ -442,6 +500,7 @@ function applyAppearance(data){
   setText('envelopeHint', a.envelopeHint);
 }
 function fillAppearanceForm(){
+  fillLoginColorForm();
   const a = {...DEFAULT_APPEARANCE, ...appearanceCache};
   const fields = {
     appearanceKicker:'kicker', appearanceTitle:'title', appearanceSubtitle:'subtitle',
@@ -472,9 +531,9 @@ async function saveAppearance(){
   };
   st.textContent='Đang lưu thay đổi giao diện...';
   try{
-    await appearanceRef.set(data);
-    appearanceCache=data;
-    applyAppearance(data);
+    await appearanceRef.set(data,{merge:true});
+    appearanceCache={...appearanceCache,...data};
+    applyAppearance(appearanceCache);
     st.textContent='Đã lưu! Giao diện trên các thiết bị sẽ tự cập nhật.';
   }catch(e){
     console.error('Save appearance error:',e);
@@ -485,23 +544,85 @@ async function resetAppearance(){
   const st=document.getElementById('appearanceStatus');
   if(!appearanceRef || !auth || !auth.currentUser){st.textContent='Bạn cần đăng nhập Admin và kết nối Firestore.';return;}
   try{
-    await appearanceRef.set({...DEFAULT_APPEARANCE,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
-    appearanceCache={...DEFAULT_APPEARANCE};
+    await appearanceRef.set({...DEFAULT_APPEARANCE,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+    appearanceCache={...appearanceCache,...DEFAULT_APPEARANCE};
     fillAppearanceForm();applyAppearance(appearanceCache);
     st.textContent='Đã khôi phục chữ mặc định trên tất cả thiết bị.';
   }catch(e){
     st.textContent='Không thể khôi phục. Kiểm tra quyền Admin và kết nối.';
   }
 }
+
+// MÀU NỀN MÀN HÌNH ĐĂNG NHẬP — ĐỒNG BỘ FIRESTORE
+const LOGIN_COLOR_KEYS=['gateColor1','gateColor2','adminColor1','adminColor2'];
+const LOGIN_COLOR_DEFAULTS={gateColor1:'#20284a',gateColor2:'#02050d',adminColor1:'#0b1227',adminColor2:'#020611'};
+const isHexColor=v=>/^#[0-9a-f]{6}$/i.test(v||'');
+function hexToRgb(h){return [1,3,5].map(i=>parseInt(h.slice(i,i+2),16))}
+function mixHex(a,b,t){const x=hexToRgb(a),y=hexToRgb(b);return '#'+x.map((v,i)=>Math.round(v+(y[i]-v)*t).toString(16).padStart(2,'0')).join('')}
+function loginGradient(c1,c2){return 'radial-gradient(ellipse at center,'+c1+' 0%,'+mixHex(c1,c2,.8)+' 65%,'+c2+' 100%)'}
+function applyLoginColors(d){
+  d=d||{};
+  const gate=document.getElementById('accessGate'),adm=document.getElementById('adminLoginModal');
+  if(gate) gate.style.background=(isHexColor(d.gateColor1)&&isHexColor(d.gateColor2))?loginGradient(d.gateColor1,d.gateColor2):'';
+  if(adm) adm.style.background=(isHexColor(d.adminColor1)&&isHexColor(d.adminColor2))?loginGradient(d.adminColor1,d.adminColor2):'';
+  try{const c={};LOGIN_COLOR_KEYS.forEach(k=>{if(isHexColor(d[k]))c[k]=d[k]});localStorage.setItem('galaxyLoginColors',JSON.stringify(c))}catch(e){}
+}
+function previewLoginColors(){
+  const v=id=>document.getElementById(id).value;
+  document.getElementById('gatePreview').style.background=loginGradient(v('gateColor1'),v('gateColor2'));
+  document.getElementById('adminPreview').style.background=loginGradient(v('adminColor1'),v('adminColor2'));
+}
+function fillLoginColorForm(){
+  const a={...LOGIN_COLOR_DEFAULTS};
+  LOGIN_COLOR_KEYS.forEach(k=>{if(isHexColor(appearanceCache[k]))a[k]=appearanceCache[k]});
+  LOGIN_COLOR_KEYS.forEach(k=>{const el=document.getElementById(k);if(el)el.value=a[k]});
+  previewLoginColors();
+}
+async function saveLoginColors(){
+  const st=document.getElementById('loginColorStatus');
+  if(!appearanceRef){st.textContent='Firestore chưa sẵn sàng. Hãy tải lại trang.';return;}
+  if(!auth||!auth.currentUser){st.textContent='Bạn cần đăng nhập Admin để lưu màu nền.';return;}
+  const data={updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+  LOGIN_COLOR_KEYS.forEach(k=>{data[k]=document.getElementById(k).value});
+  st.textContent='Đang lưu màu nền...';
+  try{
+    await appearanceRef.set(data,{merge:true});
+    appearanceCache={...appearanceCache,...data};
+    applyLoginColors(appearanceCache);
+    st.textContent='Đã lưu! Màn hình đăng nhập trên các thiết bị sẽ tự đổi màu.';
+  }catch(e){
+    console.error('Save login colors:',e);
+    st.textContent='Không lưu được ('+(e.code||e.message||'lỗi không rõ')+'). Kiểm tra đăng nhập Admin và Firestore Rules.';
+  }
+}
+async function resetLoginColors(){
+  const st=document.getElementById('loginColorStatus');
+  if(!appearanceRef||!auth||!auth.currentUser){st.textContent='Bạn cần đăng nhập Admin và kết nối Firestore.';return;}
+  const data={};LOGIN_COLOR_KEYS.forEach(k=>{data[k]=firebase.firestore.FieldValue.delete()});
+  try{
+    await appearanceRef.set(data,{merge:true});
+    LOGIN_COLOR_KEYS.forEach(k=>{delete appearanceCache[k]});
+    applyLoginColors(appearanceCache);fillLoginColorForm();
+    st.textContent='Đã khôi phục màu nền mặc định.';
+  }catch(e){
+    console.error('Reset login colors:',e);
+    st.textContent='Không thể khôi phục. Kiểm tra quyền Admin và kết nối.';
+  }
+}
+// Áp dụng màu đã lưu trên thiết bị ngay khi mở trang (tránh nháy màu cũ)
+try{applyLoginColors(JSON.parse(localStorage.getItem('galaxyLoginColors')||'{}'))}catch(e){}
+
 function startAppearanceSync(){
   if(!appearanceRef) return;
   appearanceRef.onSnapshot(doc=>{
     if(doc.exists){
       appearanceCache={...DEFAULT_APPEARANCE,...doc.data()};
       applyAppearance(appearanceCache);
+      applyLoginColors(appearanceCache);
     }else{
       appearanceCache={...DEFAULT_APPEARANCE};
       applyAppearance(appearanceCache);
+      applyLoginColors(appearanceCache);
     }
   },err=>console.error('Appearance sync error:',err));
 }
